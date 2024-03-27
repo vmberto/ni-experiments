@@ -10,14 +10,13 @@ class ExperimentalModel:
         self.model = self._build_model()
 
     def _build_model(self):
-        print(1)
         return
 
     def compile(self, optimizer='sgd', loss='categorical_crossentropy', metrics='accuracy'):
         self.model.compile(optimizer=optimizer, loss=loss, metrics=[metrics])
         self.model.summary()
 
-    def fit(self, train_generator, val_generator, callbacks=None, batch_size=32, epochs=10):
+    def fit(self, train_generator, val_generator=None, callbacks=None, batch_size=32, epochs=10):
         history = self.model.fit(
             train_generator,
             validation_data=val_generator,
@@ -42,8 +41,9 @@ class ExperimentalModel:
     def predict(self, x, y):
         prediction = self.model.predict(x)
         y_prediction = np.argmax(prediction, axis=1)
+        y_true = np.argmax(y, axis=1)
 
-        cm = confusion_matrix(y, y_prediction)
+        cm = confusion_matrix(y_true, y_prediction)
 
         disp = ConfusionMatrixDisplay(confusion_matrix=cm)
         disp.plot(cmap=plt.cm.Blues)
