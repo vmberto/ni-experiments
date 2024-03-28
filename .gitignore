@@ -131,7 +131,5 @@ dmypy.json
 # others
 .vscode
 .idea
-dataset/
 output/
 .DS_Store
-dataset_*/

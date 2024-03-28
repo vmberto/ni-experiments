@@ -2,7 +2,8 @@ opencv-python
 scikit-image
 pandas
 numpy
-tensorflow
+tensorflow==2.9.3
+tensorflow-datasets
 scikit-learn
 matplotlib
 keras

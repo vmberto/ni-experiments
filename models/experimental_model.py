@@ -16,10 +16,10 @@ class ExperimentalModel:
         self.model.compile(optimizer=optimizer, loss=loss, metrics=[metrics])
         self.model.summary()
 
-    def fit(self, train_generator, val_generator=None, callbacks=None, batch_size=32, epochs=10):
+    def fit(self, train_dataset, val_dataset=None, callbacks=None, batch_size=32, epochs=10):
         history = self.model.fit(
-            train_generator,
-            validation_data=val_generator,
+            train_dataset,
+            validation_data=val_dataset,
             batch_size=batch_size,
             epochs=epochs,
             callbacks=callbacks
@@ -35,14 +35,12 @@ class ExperimentalModel:
         plt.clf()
         return history
 
-    def evaluate(self, x_test, y_test):
-        return self.model.evaluate(x_test, y_test)
+    def evaluate(self, x, y):
+        return self.model.evaluate(x, y)
 
-    def predict(self, x, y):
-        prediction = self.model.predict(x)
+    def predict(self, dataset, y_true):
+        prediction = self.model.predict(dataset)
         y_prediction = np.argmax(prediction, axis=1)
-        y_true = np.argmax(y, axis=1)
-
         cm = confusion_matrix(y_true, y_prediction)
 
         disp = ConfusionMatrixDisplay(confusion_matrix=cm)

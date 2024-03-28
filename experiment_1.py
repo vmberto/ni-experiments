@@ -6,10 +6,9 @@ Random Noise: 0, 0.2, 0.4, 0.6
 
 """
 from keras.callbacks import EarlyStopping
-import numpy as np
 import tensorflow as tf
 from models.resnet import ResNet50Model
-from mnist import get_mnist, get_mnist_corrupted
+from dataset.mnist import get_mnist, get_mnist_corrupted
 
 BATCH_SIZE = 128
 
