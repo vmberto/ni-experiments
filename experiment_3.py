@@ -3,6 +3,7 @@ import multiprocessing
 from models.resnet import ResNet50Model
 from dataset.cifar import get_cifar10, get_cifar10_corrupted
 import tensorflow as tf
+from layers.salt_and_pepper import SaltAndPepperNoise
 
 BATCH_SIZE = 128
 IMG_SIZE = 72
@@ -12,7 +13,6 @@ INPUT_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
 def run():
     aug_layers = [
         tf.keras.layers.Resizing(IMG_SIZE, IMG_SIZE),
-        tf.keras.layers.GaussianNoise(.2),
     ]
 
     train_ds, val_ds = get_cifar10(BATCH_SIZE, aug_layers)
