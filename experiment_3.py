@@ -1,37 +1,50 @@
-"""
-
-RESNET50, Batch-size 128, 20 epochs
-CIFAR-10: Training 50000 images (train 45000, val 5000), Testing 10000 images
-Random Noise: 0, 0.2, 0.4, 0.6
-
-"""
 from keras.callbacks import EarlyStopping
-from keras.utils import to_categorical
 import multiprocessing
 from models.resnet import ResNet50Model
 from dataset.cifar import get_cifar10, get_cifar10_corrupted
-from utils.images import save_img_examples
+import tensorflow as tf
 
-BATCH_SIZE = 32
+BATCH_SIZE = 128
+IMG_SIZE = 72
+INPUT_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
 
 
 def run():
-    train_ds, val_ds = get_cifar10(BATCH_SIZE)
-    x, y = get_cifar10_corrupted(BATCH_SIZE)
+    aug_layers = [
+        tf.keras.layers.Resizing(IMG_SIZE, IMG_SIZE),
+        tf.keras.layers.GaussianNoise(.2),
+    ]
 
-    resnet = ResNet50Model()
+    train_ds, val_ds = get_cifar10(BATCH_SIZE, aug_layers)
+
+    resnet = ResNet50Model(input_shape=INPUT_SHAPE)
 
     resnet.compile()
 
     resnet.fit(
         train_ds,
         val_dataset=val_ds,
-        epochs=30,
-        callbacks=[EarlyStopping(patience=4, monitor='val_loss', verbose=1)]
+        epochs=100,
+        callbacks=[EarlyStopping(patience=10, monitor='val_loss', restore_best_weights=True, verbose=1)]
     )
 
-    resnet.evaluate(x, y)
-    # resnet.predict(eval_ds, eval_labels)
+    for corruption in [
+        'brightness_3',
+        'spatter_3',
+        'contrast_3',
+        'jpeg_compression_3',
+        'saturate_3',
+        'pixelate_3',
+        'defocus_blur_3',
+        'gaussian_blur_3',
+        'speckle_noise_3',
+        'gaussian_noise_3'
+    ]:
+        resnet.evaluate(
+            get_cifar10_corrupted(BATCH_SIZE, corruption),
+            f'cifar10/{corruption}',
+            aug_layers
+        )
 
 
 if __name__ == "__main__":

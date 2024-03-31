@@ -1,44 +1,52 @@
 import tensorflow as tf
 import tensorflow_datasets as tfds
 from keras.datasets import cifar10
-import numpy as np
+from utils.images import save_img_examples
+
+AUTO = tf.data.AUTOTUNE
+IMG_SIZE = 72
 
 
-def preprocess_image(image, label):
-    image = tf.image.resize(image, (32, 32))
-    image = image / 255.0
-    image = tf.cast(image, 'float32')
-    return image, label
-
-
-def preprocess(image, label):
-    noise = tf.random.normal(tf.shape(image), mean=0.0, stddev=0.1, dtype=tf.float32)
-    image_noisy = tf.add(image, noise)
-
-    return (image, label), (image_noisy, label)
-
-
-def get_cifar10(batch_size):
+def get_cifar10(batch_size, aug_layers):
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
-    y_train_one_hot = tf.keras.utils.to_categorical(y_train, num_classes=10)
-    y_test_one_hot = tf.keras.utils.to_categorical(y_test, num_classes=10)
 
-    train_ds = (tf.data.Dataset.from_tensor_slices((x_train, y_train_one_hot))
-                .batch(batch_size)
-                .map(preprocess_image)
-                .prefetch(tf.data.experimental.AUTOTUNE))
+    simple_aug = tf.keras.Sequential(aug_layers)
 
-    val_ds = (tf.data.Dataset.from_tensor_slices((x_test, y_test_one_hot))
-              .batch(batch_size).map(preprocess_image))
+    train_ds = (
+        tf.data.Dataset.from_tensor_slices((x_train, y_train))
+        .shuffle(batch_size * 100)
+        .batch(batch_size)
+        .map(lambda x, y: (simple_aug(x), y), num_parallel_calls=AUTO)
+        .prefetch(AUTO)
+    )
+
+    val_ds = (
+        tf.data.Dataset.from_tensor_slices((x_test, y_test))
+        .batch(batch_size)
+        .map(
+            lambda x, y: (tf.image.resize(x, (IMG_SIZE, IMG_SIZE)), y),
+            num_parallel_calls=AUTO,
+        )
+        .prefetch(AUTO)
+    )
+
+    save_img_examples(train_ds)
 
     return train_ds, val_ds
 
 
-def get_cifar10_corrupted(batch_size):
-    cifar_10_c = tfds.load("cifar10", split="test", as_supervised=True, batch_size=-1)
+def get_cifar10_corrupted(batch_size, corruption_type):
+    cifar_10_c = tfds.load(f"cifar10_corrupted/{corruption_type}", split="test", as_supervised=True)
 
-    x, y = tfds.as_numpy(cifar_10_c)
+    cifar_10_c = (
+        cifar_10_c
+        .shuffle(batch_size * 100)
+        .batch(batch_size)
+        .map(
+            lambda x, y: (tf.image.resize(x, (IMG_SIZE, IMG_SIZE)), y),
+            num_parallel_calls=AUTO,
+        )
+        .prefetch(AUTO)
+    )
 
-    y = tf.keras.utils.to_categorical(y)
-
-    return x, y
+    return cifar_10_c

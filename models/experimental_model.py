@@ -1,6 +1,5 @@
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import numpy as np
+from utils.metrics import save_accuracy_evolution, write_evaluation_result, save_confusion_matrix
 
 
 class ExperimentalModel:
@@ -12,7 +11,7 @@ class ExperimentalModel:
     def _build_model(self):
         return
 
-    def compile(self, optimizer='sgd', loss='categorical_crossentropy', metrics='accuracy'):
+    def compile(self, optimizer='adam', loss='sparse_categorical_crossentropy', metrics='accuracy'):
         self.model.compile(optimizer=optimizer, loss=loss, metrics=[metrics])
         self.model.summary()
 
@@ -24,31 +23,22 @@ class ExperimentalModel:
             epochs=epochs,
             callbacks=callbacks
         )
-        plt.plot(history.history['accuracy'])
-        plt.plot(history.history['val_accuracy'])
-        plt.ylim(0, 1)
-        plt.title('model accuracy')
-        plt.ylabel('accuracy')
-        plt.xlabel('epoch')
-        plt.legend(['train', 'test'], loc='upper left')
-        plt.savefig(f'./output/history.png')
-        plt.clf()
+
+        save_accuracy_evolution(history.history)
+
         return history
 
-    def evaluate(self, x, y):
-        return self.model.evaluate(x, y)
+    def evaluate(self, eval_ds, evaluation_name, aug_layers):
+        loss, acc = self.model.evaluate(eval_ds)
+
+        write_evaluation_result(evaluation_name, aug_layers, loss, acc)
+
+        return loss, acc
 
     def predict(self, dataset, y_true):
         prediction = self.model.predict(dataset)
-        y_prediction = np.argmax(prediction, axis=1)
-        cm = confusion_matrix(y_true, y_prediction)
+        y_pred = np.argmax(prediction, axis=1)
 
-        disp = ConfusionMatrixDisplay(confusion_matrix=cm)
-        disp.plot(cmap=plt.cm.Blues)
-        plt.title('Confusion Matrix')
-        plt.xlabel('Predicted Label')
-        plt.ylabel('True Label')
-        plt.savefig(f'./output/confusion_matrix.png')
-        plt.clf()
+        save_confusion_matrix(y_pred, y_true)
 
         return prediction
