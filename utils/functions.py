@@ -1,10 +1,10 @@
 import re
 
 
-def extract_preprocessing_layer_names(objects):
+def extract_preprocessing_layer_names(objects, params=None):
     preprocessing_layer_names = []
 
-    for obj in objects:
+    for i, obj in enumerate(objects):
         if isinstance(obj, str):
             # If the object is a string, try to extract the class name from it
             match = re.search(r"<class '.*\.(\w+)'>", obj)
@@ -13,6 +13,9 @@ def extract_preprocessing_layer_names(objects):
         else:
             # If the object is not a string, it's an instance of a class
             class_name = obj.__class__.__name__
-            preprocessing_layer_names.append(class_name)
+            if params and params[i] is not None:
+                preprocessing_layer_names.append(f"{class_name} {params[i]}")
+            else:
+                preprocessing_layer_names.append(class_name)
 
     return ", ".join(preprocessing_layer_names)

@@ -28,10 +28,10 @@ class ExperimentalModel:
 
         return history
 
-    def evaluate(self, eval_ds, evaluation_name, aug_layers):
+    def evaluate(self, eval_ds, evaluation_name, aug_layers, aug_layers_params):
         loss, acc = self.model.evaluate(eval_ds)
 
-        write_evaluation_result(evaluation_name, aug_layers, loss, acc)
+        write_evaluation_result(evaluation_name, aug_layers, aug_layers_params, loss, acc)
 
         return loss, acc
 

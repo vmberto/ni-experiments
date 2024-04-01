@@ -13,7 +13,9 @@ INPUT_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
 def run():
     aug_layers = [
         tf.keras.layers.Resizing(IMG_SIZE, IMG_SIZE),
+        SaltAndPepperNoise(.2)
     ]
+    aug_layers_params = [None, .2]
 
     train_ds, val_ds = get_cifar10(BATCH_SIZE, aug_layers)
 
@@ -43,7 +45,8 @@ def run():
         resnet.evaluate(
             get_cifar10_corrupted(BATCH_SIZE, corruption),
             f'cifar10/{corruption}',
-            aug_layers
+            aug_layers,
+            aug_layers_params
         )
 
 

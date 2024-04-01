@@ -6,21 +6,18 @@ from utils.functions import extract_preprocessing_layer_names
 import os
 
 
-def write_evaluation_result(evaluation_name, aug_layers, loss, acc):
+def write_evaluation_result(evaluation_name, aug_layers, aug_layers_params, loss, acc):
     csv_file = f'{os.getcwd()}/output/output.csv'
-    augmentation_layers = extract_preprocessing_layer_names(aug_layers)
+    augmentation_layers = extract_preprocessing_layer_names(aug_layers, aug_layers_params)
     new_line = {'Name': evaluation_name, 'Date': datetime.now(), 'Augment Layers': augmentation_layers, 'Accuracy': acc, 'Loss': loss}
 
-    # Try to read existing CSV file, if it doesn't exist create new DataFrame
     try:
         df = pd.read_csv(csv_file)
     except FileNotFoundError:
         df = pd.DataFrame(columns=['Name', 'Date', 'Accuracy', 'Loss'])
 
-    # Append the new line to the DataFrame
     df = pd.concat([df, pd.DataFrame([new_line])], ignore_index=True)
 
-    # Write the DataFrame back to the CSV file
     df.to_csv(csv_file, index=False)
 
 

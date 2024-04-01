@@ -19,4 +19,4 @@ g.legend.set_title("")
 
 plt.xticks(rotation=45, ha='right')
 
-plt.show()
+plt.savefig('./output/barplot.png')
