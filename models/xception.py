@@ -1,17 +1,17 @@
 import tensorflow as tf
-from keras.applications import VGG16
+from keras.applications import Xception
 from keras.models import Sequential
 from models.experimental_model import ExperimentalModel
 
 
-class VGG16Model(ExperimentalModel):
+class XceptionModel(ExperimentalModel):
 
     def __init__(self, input_shape=(32, 32, 3), num_classes=10):
         super().__init__(input_shape, num_classes)
-        self.model_name = 'resnet50'
+        self.model_name = 'vgg16'
 
     def _build_model(self):
-        vgg16 = VGG16(
+        vgg19 = Xception(
             weights=None,
             include_top=True,
             input_shape=self.input_shape,
@@ -20,8 +20,7 @@ class VGG16Model(ExperimentalModel):
         model = Sequential(
             [
                 tf.keras.layers.Input(self.input_shape),
-                tf.keras.layers.Rescaling(scale=1.0 / 255, offset=-1),
-                vgg16,
+                vgg19,
             ]
         )
         return model

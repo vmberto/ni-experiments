@@ -1,58 +1,42 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Layer
-from tensorflow.keras.backend import random_uniform
+import random
+from keras_cv.layers import BaseImageAugmentationLayer
+import keras_cv as keras_cv
 
 
-class SaltAndPepperNoise(Layer):
-    """A preprocessing layer which adds Salt and Pepper noise to the input during training.
+def parse_factor(param, min_value=0.0, max_value=1.0, seed=None):
+    if isinstance(param, keras_cv.core.FactorSampler):
+        return param
+    if isinstance(param, float) or isinstance(param, int):
+        param = (min_value, param)
+    if param[0] == param[1]:
+        return keras_cv.core.ConstantFactorSampler(param[0])
+    return keras_cv.core.UniformFactorSampler(param[0], param[1], seed=seed)
 
-    This layer will add Salt and Pepper noise to the input during training. At inference time,
-    the output will be identical to the input. Call the layer with `training=True`
-    to add noise to the input.
 
-    Args:
-        noise_level: Float between 0 and 1. The ratio of input pixels affected by salt and pepper noise.
-        salt_ratio: Float between 0 and 1. The ratio of salt noise relative to the total noise.
-        seed: Optional integer. Used to seed the random generator for reproducibility.
+class RandomSaltAndPepper(BaseImageAugmentationLayer):
 
-    Inputs: A tensor of any shape.
+    def __init__(self, factor, **kwargs):
+        super().__init__(**kwargs)
+        self.factor = parse_factor(factor)
 
-    Output: A tensor with Salt and Pepper noise added to the input tensor during training.
+    def augment_label(self, label, transformation=None, **kwargs):
+        return label
 
-    Example:
+    def augment_image(self, image, transformation=None, **kwargs):
+        print(self.factor())
+        mask = tf.random.uniform(shape=tf.shape(image), minval=0, maxval=1)
+        noisy_outputs = tf.where(mask < random.random() * self.factor() / 2, 0.0, image)
+        noisy_outputs = tf.where(mask > 1 - random.random() * self.factor() / 2, 1.0, noisy_outputs)
+        return noisy_outputs
 
-    ```python
-    salt_and_pepper_noise = SaltAndPepperNoise(noise_level=0.1, salt_ratio=0.5)
-
-    # A tensor input with shape [2, 2]
-    x = tf.constant([[1.0, 2.0], [3.0, 4.0]])
-
-    # Adding salt and pepper noise during training
-    output = salt_and_pepper_noise(x, training=True)
-
-    # output will be a tensor of the same shape as input with salt and pepper noise added
-    ```
-    """
-
-    def __init__(self, noise_level, salt_ratio=0.5, seed=None, **kwargs):
-        super(SaltAndPepperNoise, self).__init__(**kwargs)
-        self.noise_level = noise_level
-        self.salt_ratio = salt_ratio
-        self.seed = seed
-
-    def call(self, inputs, training=None):
-        if training:
-            # Generate random values for salt and pepper noise
-            salt_pepper = random_uniform(shape=tf.shape(inputs), dtype=inputs.dtype, seed=self.seed)
-            salt = tf.cast(salt_pepper < self.noise_level * self.salt_ratio, inputs.dtype)
-            pepper = tf.cast(salt_pepper > (1 - self.noise_level * (1 - self.salt_ratio)), inputs.dtype)
-
-            # Apply salt and pepper noise to the input
-            noisy_inputs = inputs * (1 - salt) * (1 - pepper) + salt + pepper
-            return noisy_inputs
-        return inputs
+    def compute_output_shape(self, input_shape):
+        return input_shape
 
     def get_config(self):
-        config = {'noise_level': self.noise_level, 'salt_ratio': self.salt_ratio, 'seed': self.seed}
-        base_config = super(SaltAndPepperNoise, self).get_config()
+        config = {
+            'noise_level': self.noise_level,
+            'seed': self.seed,
+        }
+        base_config = super(RandomSaltAndPepper, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

@@ -1,11 +1,11 @@
-opencv-python
 scikit-image
 pandas
 numpy
-tensorflow==2.9.3
+tensorflow
 tensorflow-datasets
 scikit-learn
 matplotlib
 keras
 seaborn
 matplotlib
+keras_cv
