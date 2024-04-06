@@ -8,15 +8,15 @@ import os
 sns.set_theme(style="whitegrid")
 
 
-def write_evaluation_result(evaluation_name, aug_layers, aug_layers_params, loss, acc):
+def write_evaluation_result(evaluation_name, aug_layers, execution_name, loss, acc):
     csv_file = f'{os.getcwd()}/output/output.csv'
-    augmentation_layers = extract_preprocessing_layer_names(aug_layers, aug_layers_params)
-    new_line = {'Name': evaluation_name, 'Date': datetime.now(), 'Augment Layers': augmentation_layers, 'Accuracy': acc, 'Loss': loss}
+    augmentation_layers = extract_preprocessing_layer_names(aug_layers)
+    new_line = {'Execution Name': execution_name, 'Evaluation Name': evaluation_name, 'Date': datetime.now(), 'Augment Layers': augmentation_layers, 'Accuracy': acc, 'Loss': loss}
 
     try:
         df = pd.read_csv(csv_file)
     except FileNotFoundError:
-        df = pd.DataFrame(columns=['Name', 'Date', 'Accuracy', 'Loss'])
+        df = pd.DataFrame(columns=['Execution Name', 'Evaluation Name', 'Date', 'Augment Layers', 'Accuracy', 'Loss'])
 
     df = pd.concat([df, pd.DataFrame([new_line])], ignore_index=True)
 

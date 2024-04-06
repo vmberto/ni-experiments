@@ -1,4 +1,5 @@
 import tensorflow as tf
+import keras_cv as keras_cv
 import tensorflow_datasets as tfds
 from keras.datasets import cifar10
 
@@ -8,14 +9,11 @@ AUTOTUNE = tf.data.AUTOTUNE
 def prepare(ds, shuffle=False, batch_size=128, data_augmentation=None, img_size=72):
 
     resize_and_rescale = tf.keras.Sequential([
-        tf.keras.layers.Resizing(img_size, img_size),
-        tf.keras.layers.Rescaling(1. / 255)
+        keras_cv.layers.Resizing(img_size, img_size),
+        keras_cv.layers.Rescaling(1. / 255)
     ])
 
-    data_augmentation_sequential = tf.keras.Sequential(data_augmentation)
-
-    ds = ds.map(lambda x, y: (resize_and_rescale(x), y),
-                num_parallel_calls=AUTOTUNE)
+    ds = ds.map(lambda x, y: (resize_and_rescale(x), y), num_parallel_calls=AUTOTUNE)
 
     if shuffle:
         ds = ds.shuffle(1000)
@@ -23,6 +21,7 @@ def prepare(ds, shuffle=False, batch_size=128, data_augmentation=None, img_size=
     ds = ds.batch(batch_size)
 
     if data_augmentation:
+        data_augmentation_sequential = tf.keras.Sequential(data_augmentation)
         ds = ds.map(lambda x, y: (data_augmentation_sequential(x, training=True), y),
                     num_parallel_calls=AUTOTUNE)
 

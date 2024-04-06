@@ -7,6 +7,7 @@ class ExperimentalModel:
         self.input_shape = input_shape
         self.num_classes = num_classes
         self.model = self._build_model()
+        self.compile()
 
     def _build_model(self):
         return
@@ -28,10 +29,10 @@ class ExperimentalModel:
 
         return history
 
-    def evaluate(self, eval_ds, evaluation_name, aug_layers, aug_layers_params):
+    def evaluate(self, eval_ds, evaluation_name, aug_layers, execution_name):
         loss, acc = self.model.evaluate(eval_ds)
 
-        write_evaluation_result(evaluation_name, aug_layers, aug_layers_params, loss, acc)
+        write_evaluation_result(evaluation_name, aug_layers, execution_name, loss, acc)
 
         return loss, acc
 
