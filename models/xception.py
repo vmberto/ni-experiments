@@ -6,12 +6,12 @@ from models.experimental_model import ExperimentalModel
 
 class XceptionModel(ExperimentalModel):
 
-    def __init__(self, input_shape=(32, 32, 3), num_classes=10):
-        super().__init__(input_shape, num_classes)
-        self.model_name = 'vgg16'
+    def __init__(self, input_shape=(32, 32, 3), num_classes=10, execution_name=''):
+        super().__init__(input_shape, num_classes, execution_name)
+        self.model_name = 'xception'
 
     def _build_model(self):
-        vgg19 = Xception(
+        xception = Xception(
             weights=None,
             include_top=True,
             input_shape=self.input_shape,
@@ -20,7 +20,7 @@ class XceptionModel(ExperimentalModel):
         model = Sequential(
             [
                 tf.keras.layers.Input(self.input_shape),
-                vgg19,
+                xception,
             ]
         )
         return model
