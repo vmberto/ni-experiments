@@ -32,12 +32,12 @@ def prepare(ds, shuffle=False, data_augmentation=None, img_size=72):
     return ds.prefetch(buffer_size=AUTOTUNE)
 
 
-def get_cifar10_kfold_splits():
+def get_cifar10_kfold_splits(n_splits):
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
     x = np.concatenate((x_train, x_test), axis=0)
     y = np.concatenate((y_train, y_test), axis=0)
 
-    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
     dataset_splits = list(enumerate(kf.split(x, y)))
 
     return x, y, dataset_splits

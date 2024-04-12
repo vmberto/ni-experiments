@@ -1,19 +1,16 @@
+from keras.layers import GaussianNoise
 from models.xception import XceptionModel
 from experiment import experiment
-import keras_cv.layers as layers
 import multiprocessing
 
 INPUT_SHAPE = (72, 72, 3)
 
 
 def run():
-    execution_name = 'DefaultAug'
+    execution_name = 'GaussianNoise'
 
-    data_augmentation_layers = [
-        layers.RandomFlip("horizontal"),
-        layers.RandomRotation(factor=0.02),
-        layers.RandomZoom(height_factor=0.2, width_factor=0.2),
-    ]
+    # In this execution, the Gaussian Noise has a FIXED FACTOR
+    data_augmentation_layers = [GaussianNoise(0.1)]
 
     xception = XceptionModel(input_shape=INPUT_SHAPE, approach_name=execution_name)
 

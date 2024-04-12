@@ -6,9 +6,11 @@ import numpy as np
 from utils.metrics import write_fscore_result
 from keras.backend import clear_session
 
+KFOLD_N_SPLITS = 10
+
 
 def experiment(model, data_augmentation_layers):
-    x, y, splits = get_cifar10_kfold_splits()
+    x, y, splits = get_cifar10_kfold_splits(KFOLD_N_SPLITS)
 
     for fold_number, (train_index, val_index) in splits:
         clear_session()

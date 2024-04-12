@@ -3,7 +3,6 @@ from keras_cv.core import UniformFactorSampler
 from models.xception import XceptionModel
 from experiment import experiment
 import multiprocessing
-import os
 
 INPUT_SHAPE = (72, 72, 3)
 

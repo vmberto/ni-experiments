@@ -4,7 +4,6 @@ from models.xception import XceptionModel
 from experiment import experiment
 import keras_cv.layers as layers
 import multiprocessing
-import os
 
 INPUT_SHAPE = (72, 72, 3)
 

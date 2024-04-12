@@ -10,6 +10,9 @@ def save_img_examples(dataset, img_num=3):
     plt.figure(figsize=(10, 10))
     for i, image in enumerate(sample_images[:img_num]):
         image_path = os.path.join(f'{os.getcwd()}/output', f'image_{i}.png')
-        plt.imsave(image_path, image.numpy().astype("float32"))
+
+        image = (image.numpy() - image.numpy().min()) / (image.numpy().max() - image.numpy().min())
+
+        plt.imsave(image_path, image.astype("float32"))
         plt.axis("off")
         plt.clf()
