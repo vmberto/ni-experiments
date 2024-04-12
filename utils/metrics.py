@@ -1,6 +1,5 @@
 from datetime import datetime
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-from utils.functions import extract_preprocessing_layer_names
 import seaborn as sns
 import pandas as pd
 import numpy as np
@@ -11,15 +10,13 @@ import os
 sns.set_theme(style="whitegrid")
 
 
-def write_evaluation_result(corruption_type, aug_layers, execution_name, loss, acc):
+def write_evaluation_result(corruption_type, execution_name, loss, acc):
     csv_file = f'{os.getcwd()}/output/output.csv'
-    augmentation_layers = extract_preprocessing_layer_names(aug_layers)
 
     new_line = {
         'Execution Name': execution_name,
         'Corruption Type': corruption_type,
         'Date': datetime.now(),
-        'Augment Layers': augmentation_layers,
         'Accuracy': acc,
         'Loss': loss
     }
@@ -34,15 +31,14 @@ def write_evaluation_result(corruption_type, aug_layers, execution_name, loss, a
     df.to_csv(csv_file, index=False)
 
 
-def write_fscore_result(corruption_type, aug_layers, execution_name, fscore):
+def write_fscore_result(corruption_type, approach_name, model_name, fscore):
     csv_file = f'{os.getcwd()}/output/output.csv'
-    augmentation_layers = extract_preprocessing_layer_names(aug_layers)
 
     new_line = {
-        'Execution Name': execution_name,
+        'Approach': approach_name,
+        'Model': model_name,
         'Corruption Type': corruption_type,
         'Date': datetime.now(),
-        'Augment Layers': augmentation_layers,
         'Fscore': fscore,
     }
 
@@ -50,7 +46,7 @@ def write_fscore_result(corruption_type, aug_layers, execution_name, fscore):
         df = pd.read_csv(csv_file)
     except FileNotFoundError:
         df = pd.DataFrame(
-            columns=['Execution Name', 'Corruption Type', 'Date', 'Augment Layers', 'Fscore'])
+            columns=['Approach', 'Model', 'Corruption Type', 'Date', 'Fscore'])
 
     df = pd.concat([df, pd.DataFrame([new_line])], ignore_index=True)
 

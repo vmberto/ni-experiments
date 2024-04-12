@@ -6,7 +6,7 @@ import numpy as np
 from utils.metrics import write_fscore_result
 
 
-def experiment(execution_name, model, data_augmentation_layers):
+def experiment(model, data_augmentation_layers):
     x, y, splits = get_cifar10_kfold_splits()
 
     for fold_number, (train_index, val_index) in splits:
@@ -35,13 +35,7 @@ def experiment(execution_name, model, data_augmentation_layers):
 
             write_fscore_result(
                 corruption,
-                data_augmentation_layers,
-                execution_name,
+                model.approach_name,
+                model.name,
                 f1,
             )
-            # model.evaluate(
-            #     get_cifar10_corrupted(corruption),
-            #     f'cifar10/{corruption}',
-            #     data_augmentation_layers,
-            #     execution_name,
-            # )

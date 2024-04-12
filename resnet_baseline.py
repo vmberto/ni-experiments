@@ -1,19 +1,18 @@
 from models.resnet import ResNet50Model
 from experiment import experiment
 import multiprocessing
-import os
 
 INPUT_SHAPE = (72, 72, 3)
 
 
 def run():
-    execution_name = os.path.splitext(os.path.basename(__file__))[0]
+    approach_name = 'Baseline'
 
     data_augmentation_layers = []
 
-    resnet = ResNet50Model(input_shape=INPUT_SHAPE, execution_name=execution_name)
+    resnet = ResNet50Model(input_shape=INPUT_SHAPE, approach_name=approach_name)
 
-    experiment(execution_name, resnet, data_augmentation_layers)
+    experiment(resnet, data_augmentation_layers)
 
 
 if __name__ == "__main__":

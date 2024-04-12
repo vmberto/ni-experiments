@@ -13,7 +13,7 @@ sns.set_style("white", {
   "font.serif": ["Times", "Palatino", "serif"],
 })
 
-df = pd.read_csv('output/output.csv')
+df = pd.read_csv('output/resnet_output.csv')
 
 grouped = df.groupby('Execution Name')
 
@@ -50,31 +50,7 @@ plt.savefig('./output/heatmap-loss.png')
 plt.clf()
 
 
-ax = sns.pointplot(
-    data=df,
-    x='Accuracy',
-    y='Corruption Type',
-    hue='Execution Name',
-    linestyles='none',
-    errorbar='ci',
-    err_kws={'linewidth': 4}
-)
 
-ax.set_xlabel("Accuracy", fontsize=18)
-ax.set_ylabel("Corruption Type", fontsize=18)
-ax.tick_params(labelsize=18)
-
-plt.subplots_adjust(top=0.925,
-                    bottom=0.20,
-                    left=0.07,
-                    right=0.90,
-                    hspace=0.01,
-                    wspace=0.01)
-# ax.legend(ncol=2, loc="lower right", frameon=True)
-sns.despine(left=True, bottom=True)
-plt.tight_layout()
-plt.savefig(f'{os.getcwd()}/output/ci.png')
-plt.clf()
 
 
 # def save_images(dataset, num_images=5, output_dir='./output'):

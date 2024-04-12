@@ -7,13 +7,13 @@ INPUT_SHAPE = (72, 72, 3)
 
 
 def run():
-    execution_name = os.path.splitext(os.path.basename(__file__))[0]
-    print(execution_name)
+    execution_name = 'Baseline'
+
     data_augmentation_layers = []
 
-    xception = XceptionModel(input_shape=INPUT_SHAPE, execution_name=execution_name)
+    xception = XceptionModel(input_shape=INPUT_SHAPE, approach_name=execution_name)
 
-    experiment(execution_name, xception, data_augmentation_layers)
+    experiment(xception, data_augmentation_layers)
 
 
 if __name__ == "__main__":

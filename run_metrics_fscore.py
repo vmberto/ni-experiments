@@ -11,7 +11,7 @@ sns.set_style("white", {
   "font.serif": ["Times", "Palatino", "serif"],
 })
 
-df = pd.read_csv('output/output.csv')
+df = pd.read_csv('output/resnet_output.csv')
 
 grouped = df.groupby('Execution Name')
 
