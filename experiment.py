@@ -4,12 +4,15 @@ from utils.consts import CORRUPTIONS_TYPES
 from sklearn.metrics import f1_score
 import numpy as np
 from utils.metrics import write_fscore_result
+from keras.backend import clear_session
 
 
 def experiment(model, data_augmentation_layers):
     x, y, splits = get_cifar10_kfold_splits()
 
     for fold_number, (train_index, val_index) in splits:
+        clear_session()
+
         x_train_fold, y_train_fold = x[train_index], y[train_index]
         x_val_fold, y_val_fold = x[val_index], y[val_index]
 
