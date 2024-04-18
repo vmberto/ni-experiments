@@ -1,13 +1,6 @@
 from datetime import datetime
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-import seaborn as sns
 import pandas as pd
-import numpy as np
-from matplotlib import pyplot as plt
-import scipy
 import os
-
-sns.set_theme(style="whitegrid")
 
 
 def write_acc_loss_result(corruption_type, execution_name, loss, acc):

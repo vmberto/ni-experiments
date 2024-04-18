@@ -5,15 +5,16 @@ import keras_cv as keras_cv
 import tensorflow_datasets as tfds
 from keras.datasets import cifar10
 from sklearn.model_selection import KFold
+from experiments_config import INPUT_SHAPE
 
 AUTOTUNE = tf.data.AUTOTUNE
 BATCH_SIZE = 128
 
 
-def prepare(ds, shuffle=False, data_augmentation=None, img_size=72):
+def prepare(ds, shuffle=False, data_augmentation=None):
 
     resize_and_rescale = tf.keras.Sequential([
-        keras_cv.layers.Resizing(img_size, img_size),
+        keras_cv.layers.Resizing(INPUT_SHAPE[0], INPUT_SHAPE[1]),
         keras_cv.layers.Rescaling(1. / 255)
     ])
 
@@ -34,13 +35,11 @@ def prepare(ds, shuffle=False, data_augmentation=None, img_size=72):
 
 def get_cifar10_kfold_splits(n_splits):
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
-    x = np.concatenate((x_train, x_test), axis=0)
-    y = np.concatenate((y_train, y_test), axis=0)
 
-    kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
-    dataset_splits = list(enumerate(kf.split(x, y)))
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=0)
+    dataset_splits = list(enumerate(kf.split(x_train, y_train)))
 
-    return x, y, dataset_splits
+    return x_train, y_train, x_test, y_test, dataset_splits
 
 
 def get_cifar10_dataset(x, y, aug_layers=None):

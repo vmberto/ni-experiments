@@ -1,4 +1,6 @@
 from utils.metrics import write_acc_loss_result
+from sklearn.metrics import f1_score
+import numpy as np
 import time
 
 
@@ -38,4 +40,10 @@ class ExperimentalModel:
         return loss, acc
 
     def predict(self, dataset):
-        return self.model.predict(dataset, verbose=0)
+        y_true = np.concatenate([y for x, y in dataset], axis=0)
+
+        predictions = self.model.predict(dataset, verbose=0)
+        y_pred = np.argmax(predictions, axis=1)
+        f1 = f1_score(y_true, y_pred, average='macro')
+
+        return f1
