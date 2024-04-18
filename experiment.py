@@ -1,4 +1,5 @@
 from dataset.cifar import get_cifar10_kfold_splits, get_cifar10_dataset, get_cifar10_corrupted
+<<<<<<< Updated upstream
 from experiments_config import CONFIGS, KFOLD_N_SPLITS, INPUT_SHAPE
 from utils.metrics import write_fscore_result
 from utils.consts import CORRUPTIONS_TYPES
@@ -6,6 +7,15 @@ from keras.callbacks import EarlyStopping
 from utils.functions import filter_active
 from utils.images import save_img_examples
 from utils.logger import print_execution, print_evaluation
+=======
+from experiments_config import configs as all_experiments
+from lib.metrics import write_fscore_result
+from lib.consts import CORRUPTIONS_TYPES
+from keras.callbacks import EarlyStopping
+from lib.functions import filter_active
+from sklearn.metrics import f1_score
+from tqdm import tqdm
+>>>>>>> Stashed changes
 import multiprocessing
 
 
@@ -14,7 +24,7 @@ def experiment():
 
     experiments_config = filter_active(CONFIGS)
 
-    for index, config in enumerate(experiments_config):
+    for index, config in tqdm(enumerate(experiments_config)):
         approach_name = config['approach_name']
         model_config = config['model']
         data_augmentation_layers = config['data_augmentation_layers']

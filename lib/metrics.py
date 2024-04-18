@@ -45,3 +45,27 @@ def write_fscore_result(corruption_type, approach_name, model_name, fscore, trai
     df = pd.concat([df, pd.DataFrame([new_line])], ignore_index=True)
 
     df.to_csv(csv_file, index=False)
+
+
+def write_fscore_result_json(corruption_type, approach_name, model_name, fscore, training_time):
+    json_file = f'{os.getcwd()}/output/output.json'
+
+    new_line = {
+        'Approach': approach_name,
+        'Model': model_name,
+        'Corruption Type': corruption_type,
+        'Date': str(datetime.now()),
+        'Training Time': training_time,
+        'Fscore': fscore,
+    }
+
+    try:
+        with open(json_file, 'r') as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        data = []
+
+    data.append(new_line)
+
+    with open(json_file, 'w') as file:
+        json.dump(data, file, indent=4)
