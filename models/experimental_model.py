@@ -1,10 +1,6 @@
-<<<<<<< Updated upstream
-from utils.metrics import write_acc_loss_result
-from sklearn.metrics import f1_score
+from sklearn.metrics import classification_report, confusion_matrix
+from lib.metrics import confusion_matrix_format
 import numpy as np
-=======
-from lib.metrics import write_acc_loss_result
->>>>>>> Stashed changes
 import time
 
 
@@ -36,18 +32,16 @@ class ExperimentalModel:
 
         return history, training_time
 
-    def evaluate(self, eval_ds, corruption_type, execution_name):
-        loss, acc = self.model.evaluate(eval_ds)
-
-        write_acc_loss_result(corruption_type, execution_name, loss, acc)
-
-        return loss, acc
-
     def predict(self, dataset):
         y_true = np.concatenate([y for x, y in dataset], axis=0)
 
-        predictions = self.model.predict(dataset, verbose=0)
-        y_pred = np.argmax(predictions, axis=1)
-        f1 = f1_score(y_true, y_pred, average='macro')
+        y_pred = self.model.predict(dataset, verbose=0)
+        y_pred = np.argmax(y_pred, axis=1)
+        report = classification_report(y_true, y_pred, output_dict=True)
+        conf_matrix = confusion_matrix_format(y_true, y_pred)
 
-        return f1
+        return report, conf_matrix
+
+    def evaluate(self, dataset):
+        loss, acc = self.model.evaluate(dataset, verbose=0)
+        return loss, acc

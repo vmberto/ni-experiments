@@ -1,6 +1,5 @@
 import tensorflow as tf
 from tensorflow.data import Dataset
-import numpy as np
 import keras_cv as keras_cv
 import tensorflow_datasets as tfds
 from keras.datasets import cifar10

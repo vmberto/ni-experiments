@@ -5,7 +5,7 @@ import keras.layers as layers
 from keras_cv.core import UniformFactorSampler
 
 INPUT_SHAPE = (72, 72, 3)
-KFOLD_N_SPLITS = 5
+KFOLD_N_SPLITS = 10
 factor = UniformFactorSampler(0, .3)
 
 CONFIGS = [
@@ -23,7 +23,7 @@ CONFIGS = [
     },
     {
         "approach_name": 'Gaussian',
-        "data_augmentation_layers": [layers.GaussianNoise(.3)],
+        "data_augmentation_layers": [layers.GaussianNoise(.1)],
         "model": ResNet50Model,
         "active": True,
     },
@@ -35,7 +35,7 @@ CONFIGS = [
             layers.RandomZoom(height_factor=0.2, width_factor=0.2),
         ],
         "model": ResNet50Model,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'DefaultAug+S&P',
@@ -46,7 +46,7 @@ CONFIGS = [
             RandomSaltAndPepper(factor),
         ],
         "model": ResNet50Model,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'DefaultAug+Gaussian',
@@ -57,7 +57,7 @@ CONFIGS = [
             layers.GaussianNoise(.1),
         ],
         "model": ResNet50Model,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'Baseline',
@@ -85,7 +85,7 @@ CONFIGS = [
             layers.RandomZoom(height_factor=0.2, width_factor=0.2),
         ],
         "model": XceptionModel,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'DefaultAug+S&P',
@@ -96,7 +96,7 @@ CONFIGS = [
             RandomSaltAndPepper(factor),
         ],
         "model": XceptionModel,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'DefaultAug+Gaussian',
@@ -107,6 +107,6 @@ CONFIGS = [
             layers.GaussianNoise(.1),
         ],
         "model": XceptionModel,
-        "active": False,
+        "active": True,
     },
 ]
