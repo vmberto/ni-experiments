@@ -1,5 +1,4 @@
-from sklearn.metrics import classification_report, confusion_matrix
-from lib.metrics import confusion_matrix_format
+from sklearn.metrics import classification_report
 import numpy as np
 import time
 
@@ -38,9 +37,7 @@ class ExperimentalModel:
         y_pred = self.model.predict(dataset, verbose=0)
         y_pred = np.argmax(y_pred, axis=1)
         report = classification_report(y_true, y_pred, output_dict=True)
-        conf_matrix = confusion_matrix_format(y_true, y_pred)
-
-        return report, conf_matrix
+        return report
 
     def evaluate(self, dataset):
         loss, acc = self.model.evaluate(dataset, verbose=0)

@@ -1,6 +1,6 @@
 from dataset.cifar import get_cifar10_kfold_splits, get_cifar10_dataset, get_cifar10_corrupted
 from experiments_config import CONFIGS, KFOLD_N_SPLITS, INPUT_SHAPE
-from lib.metrics import write_fscore_result_json, write_fscore_result
+from lib.metrics import write_fscore_result
 from lib.consts import CORRUPTIONS_TYPES
 from lib.logger import print_execution, print_evaluation
 from keras.callbacks import EarlyStopping
@@ -34,43 +34,42 @@ def experiment():
             _, training_time = model.fit(
                 train_ds,
                 val_dataset=val_ds,
-                epochs=100,
+                epochs=1,
                 callbacks=[EarlyStopping(patience=10, monitor='val_loss', restore_best_weights=True, verbose=1)]
             )
 
             print_evaluation(fold_number, approach_name, model.name, f'in-distribution')
 
-            report, conf_matrix = model.predict(test_ds)
+            report = model.predict(test_ds)
             loss, acc = model.evaluate(test_ds)
+
             write_fscore_result(
                 'in-distribution',
                 approach_name,
                 model.name,
-                report,
-                conf_matrix,
                 training_time,
                 fold_number,
                 loss,
                 acc,
+                report,
             )
 
             for corruption in CORRUPTIONS_TYPES:
                 print_evaluation(fold_number, approach_name, model.name, f'in {corruption}')
 
                 corrupted_dataset = get_cifar10_corrupted(corruption)
-                report, conf_matrix = model.predict(corrupted_dataset)
+                report, conf_matrix, y_predictions = model.predict(corrupted_dataset)
                 loss, acc = model.evaluate(corrupted_dataset)
 
                 write_fscore_result(
                     corruption,
                     approach_name,
                     model.name,
-                    report,
-                    conf_matrix,
                     training_time,
                     fold_number,
                     loss,
-                    acc
+                    acc,
+                    report,
                 )
 
 

@@ -7,7 +7,7 @@ from sklearn.model_selection import KFold
 from experiments_config import INPUT_SHAPE
 
 AUTOTUNE = tf.data.AUTOTUNE
-BATCH_SIZE = 128
+BATCH_SIZE = 72
 
 
 def prepare(ds, shuffle=False, data_augmentation=None):
@@ -41,8 +41,8 @@ def get_cifar10_kfold_splits(n_splits):
     return x_train, y_train, x_test, y_test, dataset_splits
 
 
-def get_cifar10_dataset(x, y, aug_layers=None):
-    dataset = prepare(Dataset.from_tensor_slices((x, y)), data_augmentation=aug_layers)
+def get_cifar10_dataset(x, y, data_augmentation=None):
+    dataset = prepare(Dataset.from_tensor_slices((x, y)), data_augmentation=data_augmentation)
     return dataset
 
 

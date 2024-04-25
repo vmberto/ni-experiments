@@ -25,7 +25,7 @@ CONFIGS = [
         "approach_name": 'Gaussian',
         "data_augmentation_layers": [layers.GaussianNoise(.1)],
         "model": ResNet50Model,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'DefaultAug',
@@ -35,7 +35,7 @@ CONFIGS = [
             layers.RandomZoom(height_factor=0.2, width_factor=0.2),
         ],
         "model": ResNet50Model,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'DefaultAug+S&P',
@@ -46,7 +46,7 @@ CONFIGS = [
             RandomSaltAndPepper(factor),
         ],
         "model": ResNet50Model,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'DefaultAug+Gaussian',
@@ -57,25 +57,25 @@ CONFIGS = [
             layers.GaussianNoise(.1),
         ],
         "model": ResNet50Model,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'Baseline',
         "data_augmentation_layers": [],
         "model": XceptionModel,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'Salt&Pepper',
         "data_augmentation_layers": [RandomSaltAndPepper(factor)],
         "model": XceptionModel,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'Gaussian',
         "data_augmentation_layers": [layers.GaussianNoise(.1)],
         "model": XceptionModel,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'DefaultAug',
@@ -85,7 +85,7 @@ CONFIGS = [
             layers.RandomZoom(height_factor=0.2, width_factor=0.2),
         ],
         "model": XceptionModel,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'DefaultAug+S&P',
@@ -96,7 +96,7 @@ CONFIGS = [
             RandomSaltAndPepper(factor),
         ],
         "model": XceptionModel,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'DefaultAug+Gaussian',
@@ -107,6 +107,6 @@ CONFIGS = [
             layers.GaussianNoise(.1),
         ],
         "model": XceptionModel,
-        "active": True,
+        "active": False,
     },
 ]

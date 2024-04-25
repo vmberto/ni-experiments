@@ -2,7 +2,7 @@ import tensorflow as tf
 import random
 from keras_cv.layers import BaseImageAugmentationLayer
 import keras_cv as keras_cv
-import numpy as np
+
 
 def parse_factor(param, min_value=0.0, max_value=1.0, seed=None):
     if isinstance(param, keras_cv.core.FactorSampler):
@@ -26,8 +26,8 @@ class RandomSaltAndPepper(BaseImageAugmentationLayer):
 
     def augment_image(self, image, transformation=None, **kwargs):
         mask = tf.random.uniform(shape=tf.shape(image), minval=0, maxval=1)
-        noisy_outputs = tf.where(mask < random.random() * np.random.beta(1, 10) / 2, 0.0, image)
-        noisy_outputs = tf.where(mask > 1 - random.random() * np.random.beta(1, 10) / 2, 1.0, noisy_outputs)
+        noisy_outputs = tf.where(mask < random.random() * self.factor() / 2, 0.0, image)
+        noisy_outputs = tf.where(mask > 1 - random.random() * self.factor() / 2, 1.0, noisy_outputs)
         return noisy_outputs
 
     def compute_output_shape(self, input_shape):
