@@ -4,10 +4,9 @@ import keras_cv as keras_cv
 import tensorflow_datasets as tfds
 from keras.datasets import cifar10
 from sklearn.model_selection import KFold
-from experiments_config import INPUT_SHAPE
+from experiments_config import INPUT_SHAPE, BATCH_SIZE
 
 AUTOTUNE = tf.data.AUTOTUNE
-BATCH_SIZE = 72
 
 
 def prepare(ds, shuffle=False, data_augmentation=None):

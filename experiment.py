@@ -1,5 +1,5 @@
 from dataset.cifar import get_cifar10_kfold_splits, get_cifar10_dataset, get_cifar10_corrupted
-from experiments_config import CONFIGS, KFOLD_N_SPLITS, INPUT_SHAPE
+from experiments_config import CONFIGS, KFOLD_N_SPLITS, INPUT_SHAPE, EPOCHS
 from lib.metrics import write_fscore_result
 from lib.consts import CORRUPTIONS_TYPES
 from lib.logger import print_execution, print_evaluation
@@ -34,7 +34,7 @@ def experiment():
             _, training_time = model.fit(
                 train_ds,
                 val_dataset=val_ds,
-                epochs=1,
+                epochs=EPOCHS,
                 callbacks=[EarlyStopping(patience=10, monitor='val_loss', restore_best_weights=True, verbose=1)]
             )
 
@@ -58,7 +58,7 @@ def experiment():
                 print_evaluation(fold_number, approach_name, model.name, f'in {corruption}')
 
                 corrupted_dataset = get_cifar10_corrupted(corruption)
-                report, conf_matrix, y_predictions = model.predict(corrupted_dataset)
+                report = model.predict(corrupted_dataset)
                 loss, acc = model.evaluate(corrupted_dataset)
 
                 write_fscore_result(

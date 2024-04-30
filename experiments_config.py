@@ -4,9 +4,11 @@ from layers.salt_and_pepper import RandomSaltAndPepper
 import keras.layers as layers
 from keras_cv.core import UniformFactorSampler
 
+EPOCHS = 100
+BATCH_SIZE = 128
 INPUT_SHAPE = (72, 72, 3)
-KFOLD_N_SPLITS = 10
-factor = UniformFactorSampler(0, .3)
+KFOLD_N_SPLITS = 15
+factor = UniformFactorSampler(0, .5)
 
 CONFIGS = [
     {
@@ -25,7 +27,7 @@ CONFIGS = [
         "approach_name": 'Gaussian',
         "data_augmentation_layers": [layers.GaussianNoise(.1)],
         "model": ResNet50Model,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'DefaultAug',
@@ -35,7 +37,7 @@ CONFIGS = [
             layers.RandomZoom(height_factor=0.2, width_factor=0.2),
         ],
         "model": ResNet50Model,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'DefaultAug+S&P',
@@ -46,7 +48,7 @@ CONFIGS = [
             RandomSaltAndPepper(factor),
         ],
         "model": ResNet50Model,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'DefaultAug+Gaussian',
@@ -57,25 +59,25 @@ CONFIGS = [
             layers.GaussianNoise(.1),
         ],
         "model": ResNet50Model,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'Baseline',
         "data_augmentation_layers": [],
         "model": XceptionModel,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'Salt&Pepper',
         "data_augmentation_layers": [RandomSaltAndPepper(factor)],
         "model": XceptionModel,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'Gaussian',
         "data_augmentation_layers": [layers.GaussianNoise(.1)],
         "model": XceptionModel,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'DefaultAug',
@@ -85,7 +87,7 @@ CONFIGS = [
             layers.RandomZoom(height_factor=0.2, width_factor=0.2),
         ],
         "model": XceptionModel,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'DefaultAug+S&P',
@@ -96,7 +98,7 @@ CONFIGS = [
             RandomSaltAndPepper(factor),
         ],
         "model": XceptionModel,
-        "active": False,
+        "active": True,
     },
     {
         "approach_name": 'DefaultAug+Gaussian',
@@ -107,6 +109,6 @@ CONFIGS = [
             layers.GaussianNoise(.1),
         ],
         "model": XceptionModel,
-        "active": False,
+        "active": True,
     },
 ]
