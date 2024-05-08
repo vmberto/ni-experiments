@@ -8,7 +8,6 @@ Noise injection is a regularization technique used to improve the generalization
 
 ## Table of Contents
 
-- [Introduction](#introduction)
 - [Installation](#installation)
 - [Usage](#usage)
 
