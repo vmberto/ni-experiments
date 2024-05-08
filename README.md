@@ -16,7 +16,7 @@ Noise injection is a regularization technique used to improve the generalization
 To use the code in this repository, you can clone the repository using the following command:
 
 ```bash
-git clone https://github.com/your-username/noise-injection-experiments.git
+git clone https://github.com/vmberto/noise-injection-experiments.git
 ````
 
 ## Usage
