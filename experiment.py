@@ -77,4 +77,3 @@ if __name__ == "__main__":
     p = multiprocessing.Process(target=experiment)
     p.start()
     p.join()
-    print("finished")
