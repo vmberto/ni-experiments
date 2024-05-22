@@ -131,5 +131,5 @@ dmypy.json
 # others
 .vscode
 .idea
-output/
+output/*
 .DS_Store
