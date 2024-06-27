@@ -31,7 +31,7 @@ def write_fscore_result(
     dict_report = convert_dict(report)
 
     new_line = {
-        'approach': approach_name,
+        'strategy': approach_name,
         'model': model_name,
         'evaluation_set': clean_string(evauation_set),
         'date_finished': datetime.now(),
@@ -47,7 +47,7 @@ def write_fscore_result(
     except FileNotFoundError:
         df = pd.DataFrame(
             columns=[
-                'approach', 'model', 'evaluation_set', 'date_finished', 'training_time', 'fold', 'accuracy', 'loss',
+                'strategy', 'model', 'evaluation_set', 'date_finished', 'training_time', 'fold', 'accuracy', 'loss',
             ])
 
     df = pd.concat([df, pd.DataFrame([new_line])], ignore_index=True)
