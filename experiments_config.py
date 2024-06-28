@@ -1,7 +1,7 @@
+from layers.default_aug import get_default_aug_layers as DefaultAug
 from models.resnet import ResNet50Model
 from models.xception import XceptionModel
 from layers.salt_and_pepper import RandomSaltAndPepper
-from layers.default_aug import get_default_aug_layers
 import keras.layers as layers
 from keras_cv.core import UniformFactorSampler
 
@@ -10,8 +10,6 @@ BATCH_SIZE = 128
 INPUT_SHAPE = (72, 72, 3)
 KFOLD_N_SPLITS = 15
 factor = UniformFactorSampler(0, .5)
-DefaultAug = get_default_aug_layers()
-
 
 CONFIGS = [
     {
@@ -34,29 +32,23 @@ CONFIGS = [
     },
     {
         "approach_name": 'DefaultAug',
+        "data_augmentation_layers": DefaultAug(),
+        "model": ResNet50Model,
+        "active": False,
+    },
+    {
+        "approach_name": 'DefaultAug+S&P',
         "data_augmentation_layers": [
-            DefaultAug
+            *DefaultAug(),
+            RandomSaltAndPepper(factor),
         ],
         "model": ResNet50Model,
         "active": True,
     },
     {
-        "approach_name": 'DefaultAug+S&P',
-        "data_augmentation_layers": [
-            layers.RandomFlip("horizontal"),
-            layers.RandomRotation(factor=0.02),
-            layers.RandomZoom(height_factor=0.2, width_factor=0.2),
-            RandomSaltAndPepper(factor),
-        ],
-        "model": ResNet50Model,
-        "active": False,
-    },
-    {
         "approach_name": 'DefaultAug+Gaussian',
         "data_augmentation_layers": [
-            layers.RandomFlip("horizontal"),
-            layers.RandomRotation(factor=0.02),
-            layers.RandomZoom(height_factor=0.2, width_factor=0.2),
+            *DefaultAug(),
             layers.GaussianNoise(.1),
         ],
         "model": ResNet50Model,
@@ -82,20 +74,14 @@ CONFIGS = [
     },
     {
         "approach_name": 'DefaultAug',
-        "data_augmentation_layers": [
-            layers.RandomFlip("horizontal"),
-            layers.RandomRotation(factor=0.02),
-            layers.RandomZoom(height_factor=0.2, width_factor=0.2),
-        ],
+        "data_augmentation_layers": DefaultAug(),
         "model": XceptionModel,
         "active": False,
     },
     {
         "approach_name": 'DefaultAug+S&P',
         "data_augmentation_layers": [
-            layers.RandomFlip("horizontal"),
-            layers.RandomRotation(factor=0.02),
-            layers.RandomZoom(height_factor=0.2, width_factor=0.2),
+            *DefaultAug(),
             RandomSaltAndPepper(factor),
         ],
         "model": XceptionModel,
@@ -104,9 +90,7 @@ CONFIGS = [
     {
         "approach_name": 'DefaultAug+Gaussian',
         "data_augmentation_layers": [
-            layers.RandomFlip("horizontal"),
-            layers.RandomRotation(factor=0.02),
-            layers.RandomZoom(height_factor=0.2, width_factor=0.2),
+            *DefaultAug(),
             layers.GaussianNoise(.1),
         ],
         "model": XceptionModel,

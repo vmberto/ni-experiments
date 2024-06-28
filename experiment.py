@@ -3,6 +3,7 @@ from experiments_config import CONFIGS, KFOLD_N_SPLITS, INPUT_SHAPE, EPOCHS
 from lib.metrics import write_fscore_result
 from lib.consts import CORRUPTIONS_TYPES
 from lib.logger import print_execution, print_evaluation
+from lib.images import save_img_examples
 from keras.callbacks import EarlyStopping
 from lib.functions import filter_active
 import multiprocessing
@@ -28,6 +29,8 @@ def experiment():
             x_val_fold, y_val_fold = x_train[val_index], y_train[val_index]
 
             train_ds = get_cifar10_dataset(x_train_fold, y_train_fold, data_augmentation_layers)
+
+            save_img_examples(train_ds)
             val_ds = get_cifar10_dataset(x_val_fold, y_val_fold)
             test_ds = get_cifar10_dataset(x_test, y_test)
 
