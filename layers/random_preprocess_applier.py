@@ -9,7 +9,6 @@ class RandomPreprocessApplier(tf.keras.layers.Layer):
         self.approaches = approaches
 
     def call(self, inputs):
-        print(inputs)
         random_index = random.randint(0, len(self.approaches) - 1)
         aug_approaches = self.approaches[random_index]
         if aug_approaches is not None:
