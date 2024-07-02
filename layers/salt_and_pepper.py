@@ -24,7 +24,7 @@ class RandomSaltAndPepper(BaseImageAugmentationLayer):
     def augment_label(self, label, transformation=None, **kwargs):
         return label
 
-    def augment_image(self, image, transformation=None, **kwargs):
+    def augment_image(self, image, transformation=None, training=False, **kwargs):
         mask = tf.random.uniform(shape=tf.shape(image), minval=0, maxval=1)
         noisy_outputs = tf.where(mask < random.random() * self.factor() / 2, 0.0, image)
         noisy_outputs = tf.where(mask > 1 - random.random() * self.factor() / 2, 1.0, noisy_outputs)
