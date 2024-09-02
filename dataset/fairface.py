@@ -114,10 +114,11 @@ def __load_fairface_data():
     race_mapping = {
         'White': 0,
         'Black': 1,
-        'Asian': 2,
-        'Indian': 3,
-        'Middle Eastern': 4,
-        'Latino': 5
+        'Southeast Asian': 2,
+        'East Asian': 3,
+        'Indian': 4,
+        'Middle Eastern': 5,
+        'Latino': 6
     }
 
     x_train = train_data['file'].apply(lambda x: os.path.join(EXTRACT_DIR, x)).values
