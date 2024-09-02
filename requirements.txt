@@ -10,3 +10,4 @@ seaborn
 matplotlib
 keras_cv
 scipy
+gdown

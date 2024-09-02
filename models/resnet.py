@@ -15,7 +15,7 @@ class ResNet50Model(ExperimentalModel):
             weights=None,
             include_top=True,
             input_shape=self.input_shape,
-            classes=10,
+            classes=6,
         )
         model = Sequential(
             [
