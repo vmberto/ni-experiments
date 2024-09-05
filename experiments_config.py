@@ -5,9 +5,9 @@ from layers.salt_and_pepper import RandomSaltAndPepper
 import keras.layers as layers
 from keras_cv.core import UniformFactorSampler
 
-EPOCHS = 100
+EPOCHS = 1
 BATCH_SIZE = 128
-INPUT_SHAPE = (72, 72, 3)
+INPUT_SHAPE = (224, 224, 3)
 KFOLD_N_SPLITS = 15
 factor = UniformFactorSampler(0, .5)
 

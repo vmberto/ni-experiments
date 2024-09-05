@@ -20,8 +20,7 @@ TRAIN_LABELS_OUTPUT = "dataset/fairface/fairface_train_labels.csv"
 VAL_LABELS_OUTPUT = "dataset/fairface/fairface_val_labels.csv"
 
 
-def __load_and_preprocess_image(path, label, target_size=(72, 72)):
-    """Loads and preprocesses an image."""
+def __load_and_preprocess_image(path, label, target_size=(224, 224)):
     img = tf.io.read_file(path)
     img = tf.image.decode_jpeg(img, channels=3)
     img = tf.image.resize(img, target_size)
@@ -30,13 +29,11 @@ def __load_and_preprocess_image(path, label, target_size=(72, 72)):
 
 
 def __create_dataset(image_paths, labels, data_augmentation=None):
-    """Creates a tf.data.Dataset from image paths and labels."""
     ds = Dataset.from_tensor_slices((image_paths, labels))
-    target_size = (72, 72)
 
     ds = ds.shuffle(buffer_size=len(image_paths))
 
-    ds = ds.map(lambda path, label: __load_and_preprocess_image(path, label, target_size),
+    ds = ds.map(lambda path, label: __load_and_preprocess_image(path, label, (224, 224)),
                           num_parallel_calls=tf.data.experimental.AUTOTUNE)
     ds = ds.batch(BATCH_SIZE)
     ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
@@ -75,12 +72,10 @@ def __prepare(ds, shuffle=False, data_augmentation=None):
 
 
 def __download_file(url, output):
-    """Download a file from Google Drive."""
     gdown.download(url, output, quiet=False)
 
 
 def __check_and_download(url, output):
-    """Check if a file exists, and if not, download it."""
     if not os.path.exists(output):
         print(f"{output} not found locally. Downloading now...")
         __download_file(url, output)
@@ -89,7 +84,6 @@ def __check_and_download(url, output):
 
 
 def __download_and_extract_dataset():
-    """Download and extract the FairFace dataset if not already done."""
     if not os.path.exists(EXTRACT_DIR):
         __check_and_download(DATASET_URL, DATASET_OUTPUT)
         with zipfile.ZipFile(DATASET_OUTPUT, 'r') as zip_ref:
@@ -100,17 +94,14 @@ def __download_and_extract_dataset():
 
 
 def __download_labels():
-    """Download the train and validation labels."""
     __check_and_download(TRAIN_LABELS_URL, TRAIN_LABELS_OUTPUT)
     __check_and_download(VAL_LABELS_URL, VAL_LABELS_OUTPUT)
 
 
 def __load_fairface_data():
-    """Load and return the FairFace data as (x_train, y_train), (x_val, y_val)."""
     train_data = pd.read_csv(TRAIN_LABELS_OUTPUT, delimiter=',')
     val_data = pd.read_csv(VAL_LABELS_OUTPUT, delimiter=',')
 
-    # Define race to integer mapping
     race_mapping = {
         'White': 0,
         'Black': 1,
@@ -118,7 +109,8 @@ def __load_fairface_data():
         'East Asian': 3,
         'Indian': 4,
         'Middle Eastern': 5,
-        'Latino': 6
+        'Latino': 6,
+        'Latino_Hispanic': 7,
     }
 
     x_train = train_data['file'].apply(lambda x: os.path.join(EXTRACT_DIR, x)).values
