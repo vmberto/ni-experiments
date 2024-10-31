@@ -3,7 +3,6 @@ from experiments_config import CONFIGS, KFOLD_N_SPLITS, INPUT_SHAPE, EPOCHS
 from lib.metrics import write_fscore_result
 from lib.consts import CORRUPTIONS_TYPES
 from lib.logger import print_execution, print_evaluation
-from lib.images import save_img_examples
 from keras.callbacks import EarlyStopping
 from lib.functions import filter_active
 import multiprocessing
@@ -25,13 +24,8 @@ def experiment():
             model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
             print_execution(fold_number, approach_name, model.name)
 
-            x_train_fold, y_train_fold = x_train[train_index], y_train[train_index]
-            x_val_fold, y_val_fold = x_train[val_index], y_train[val_index]
-
-            train_ds = get_cifar10_dataset(x_train_fold, y_train_fold, data_augmentation_layers)
-
-            save_img_examples(train_ds)
-            val_ds = get_cifar10_dataset(x_val_fold, y_val_fold)
+            train_ds = get_cifar10_dataset(x_train[train_index], y_train[train_index], data_augmentation_layers)
+            val_ds = get_cifar10_dataset(x_train[val_index], y_train[val_index])
             test_ds = get_cifar10_dataset(x_test, y_test)
 
             _, training_time = model.fit(

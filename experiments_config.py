@@ -8,7 +8,7 @@ from keras_cv.core import UniformFactorSampler
 EPOCHS = 100
 BATCH_SIZE = 128
 INPUT_SHAPE = (72, 72, 3)
-KFOLD_N_SPLITS = 15
+KFOLD_N_SPLITS = 10
 factor = UniformFactorSampler(0, .5)
 
 CONFIGS = [
