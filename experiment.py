@@ -5,6 +5,7 @@ from lib.consts import CORRUPTIONS_TYPES
 from lib.logger import print_execution, print_evaluation
 from keras.callbacks import EarlyStopping
 from lib.functions import filter_active
+from lib.images import save_img_examples
 import multiprocessing
 
 
@@ -24,7 +25,9 @@ def experiment():
             model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
             print_execution(fold_number, approach_name, model.name)
 
-            train_ds = get_cifar10_dataset(x_train[train_index], y_train[train_index], data_augmentation_layers)
+            train_ds = get_cifar10_dataset(
+                x_train[train_index], y_train[train_index], data_augmentation_layers, mixed=config['mixed']
+            )
             val_ds = get_cifar10_dataset(x_train[val_index], y_train[val_index])
             test_ds = get_cifar10_dataset(x_test, y_test)
 
