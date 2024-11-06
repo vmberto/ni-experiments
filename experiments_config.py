@@ -111,7 +111,6 @@ CONFIGS = [
     {
         "approach_name": 'Mixed',
         "data_augmentation_layers": [
-            None,
             DefaultAug(),
             [
                 *DefaultAug(),
@@ -129,7 +128,6 @@ CONFIGS = [
     {
         "approach_name": 'Mixed',
         "data_augmentation_layers": [
-            None,
             DefaultAug(),
             [
                 *DefaultAug(),
