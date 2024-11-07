@@ -5,10 +5,14 @@ from lib.consts import CORRUPTIONS_TYPES
 from lib.logger import print_execution, print_evaluation
 from keras.callbacks import EarlyStopping
 from lib.functions import filter_active
+from lib.gpu import set_memory_growth
+import tensorflow as tf
 import multiprocessing
 
 
 def experiment():
+    set_memory_growth(tf)
+
     x_train, y_train, x_test, y_test, splits = get_cifar10_kfold_splits(KFOLD_N_SPLITS)
 
     experiments_config = filter_active(CONFIGS)

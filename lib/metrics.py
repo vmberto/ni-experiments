@@ -2,6 +2,7 @@ from datetime import datetime
 import pandas as pd
 import os
 from lib.functions import clean_string
+from scipy.stats import entropy
 
 
 def convert_dict(data_dict):
@@ -53,3 +54,10 @@ def write_fscore_result(
     df = pd.concat([df, pd.DataFrame([new_line])], ignore_index=True)
 
     df.to_csv(csv_file, index=False)
+
+
+def calculate_kl_divergence(latent_clean, latent_corrupted):
+    epsilon = 1e-10
+    latent_clean += epsilon
+    latent_corrupted += epsilon
+    return entropy(latent_clean.flatten(), latent_corrupted.flatten())
