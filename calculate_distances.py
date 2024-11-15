@@ -45,7 +45,7 @@ def main():
                 "kl_divergences": kld,
             }
             results.append(result)
-            pd.DataFrame(results).to_csv('results/autoencoder_results_kldiv.csv')
+            pd.DataFrame(results).to_csv('output/autoencoder_results_kldiv.csv')
 
 
 if __name__ == "__main__":

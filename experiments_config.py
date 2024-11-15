@@ -1,3 +1,5 @@
+from keras_cv.src.layers import RandAugment
+
 from layers.default_aug import get_default_aug_layers as DefaultAug
 from models.resnet import ResNet50Model
 from models.efficientnet import EfficientNetB7Model
@@ -109,6 +111,13 @@ CONFIGS = [
         "active": False,
     },
     {
+        "approach_name": 'RandAugment',
+        "data_augmentation_layers": [RandAugment(value_range=(0, 255))],
+        "model": XceptionModel,
+        "mixed": False,
+        "active": True,
+    },
+    {
         "approach_name": 'DefaultAug+S&P',
         "data_augmentation_layers": [
             *DefaultAug(),
@@ -151,28 +160,28 @@ CONFIGS = [
         "data_augmentation_layers": [],
         "model": EfficientNetB7Model,
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'Salt&Pepper',
         "data_augmentation_layers": [RandomSaltAndPepper(SALTPEPPER_FACTOR)],
         "model": EfficientNetB7Model,
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'Gaussian',
         "data_augmentation_layers": [layers.GaussianNoise(.1)],
         "model": EfficientNetB7Model,
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'DefaultAug',
         "data_augmentation_layers": DefaultAug(),
         "model": EfficientNetB7Model,
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'DefaultAug+S&P',
@@ -182,7 +191,7 @@ CONFIGS = [
         ],
         "model": EfficientNetB7Model,
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'DefaultAug+Gaussian',
@@ -192,7 +201,7 @@ CONFIGS = [
         ],
         "model": EfficientNetB7Model,
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
         "approach_name": 'Mixed',
@@ -210,6 +219,6 @@ CONFIGS = [
         ],
         "model": EfficientNetB7Model,
         "mixed": True,
-        "active": True,
+        "active": False,
     },
 ]
