@@ -1,5 +1,6 @@
 from dataset.cifar import get_cifar10_kfold_splits, get_cifar10_dataset, get_cifar10_corrupted
 from experiments_config import CONFIGS, KFOLD_N_SPLITS, INPUT_SHAPE, EPOCHS
+from lib.images import save_img_examples
 from lib.metrics import write_fscore_result
 from lib.consts import CORRUPTIONS_TYPES
 from lib.logger import print_execution, print_evaluation
@@ -33,6 +34,8 @@ def experiment():
             )
             val_ds = get_cifar10_dataset(x_train[val_index], y_train[val_index])
             test_ds = get_cifar10_dataset(x_test, y_test)
+
+            save_img_examples(train_ds)
 
             _, training_time = model.fit(
                 train_ds,
