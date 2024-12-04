@@ -1,4 +1,4 @@
-CORRUPTIONS_TYPES = [
+CORRUPTIONS = [
     'brightness_1',
     'brightness_2',
     'brightness_3',
@@ -95,3 +95,5 @@ CORRUPTIONS_TYPES = [
     'zoom_blur_4',
     'zoom_blur_5',
 ]
+
+IN_DISTRIBUTION_LABEL = 'in-distribution'

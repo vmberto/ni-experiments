@@ -23,7 +23,7 @@ def convert_dict(data_dict):
 
 
 def write_fscore_result(
-        evauation_set, approach_name, model_name,
+        evauation_set, strategy_name, model_name,
         training_time, fold_number, loss, acc,
         report
 ):
@@ -32,7 +32,7 @@ def write_fscore_result(
     dict_report = convert_dict(report)
 
     new_line = {
-        'strategy': approach_name,
+        'strategy': strategy_name,
         'model': model_name,
         'evaluation_set': clean_string(evauation_set),
         'date_finished': datetime.now(),

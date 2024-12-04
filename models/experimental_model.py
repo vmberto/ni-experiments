@@ -4,10 +4,10 @@ import time
 
 
 class ExperimentalModel:
-    def __init__(self, input_shape=(32, 32, 3), num_classes=10, approach_name=''):
+    def __init__(self, input_shape=(32, 32, 3), num_classes=10, strategy_name=''):
         self.input_shape = input_shape
         self.num_classes = num_classes
-        self.approach_name = approach_name
+        self.strategy_name = strategy_name
         self.model = self._build_model()
         self.compile()
 

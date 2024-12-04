@@ -1,6 +1,6 @@
 import tensorflow as tf
 from dataset.cifar import get_dataset_for_autoencoder, prepare_cifar10_kfold_for_autoencoder, prepare_cifar10_c_with_distances
-from lib.consts import CORRUPTIONS_TYPES
+from lib.consts import CORRUPTIONS
 from lib.gpu import set_memory_growth
 from models.autoencoder import Autoencoder
 import pandas as pd
@@ -37,7 +37,7 @@ def main():
 
         encoder = autoencoder.encoder
 
-        for corruption_type in CORRUPTIONS_TYPES:
+        for corruption_type in CORRUPTIONS:
             kld = prepare_cifar10_c_with_distances(encoder, corruption_type, test_ds)
             result = {
                 "fold": fold,
