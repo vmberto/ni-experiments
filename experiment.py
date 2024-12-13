@@ -1,14 +1,16 @@
+import os
 import itertools
 from dataset.cifar import get_cifar10_kfold_splits, get_cifar10_dataset, get_cifar10_corrupted
 from experiments_config import CONFIGS, KFOLD_N_SPLITS, INPUT_SHAPE, EPOCHS, MODEL_ARCHITECTURES
 from lib.metrics import write_fscore_result
 from lib.consts import CORRUPTIONS, IN_DISTRIBUTION_LABEL
 from lib.logger import print_execution, print_evaluation
-from keras.callbacks import EarlyStopping
+from keras import callbacks
 from lib.functions import filter_active
 from lib.gpu import set_memory_growth
 import tensorflow as tf
-import multiprocessing
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 def train_and_evaluate_model(config, model_architecture, train_index, val_index, x_train, y_train, x_test, y_test, fold):
@@ -17,7 +19,6 @@ def train_and_evaluate_model(config, model_architecture, train_index, val_index,
     mixed = config['mixed']
 
     model = model_architecture(input_shape=INPUT_SHAPE)
-    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
     print_execution(fold, strategy_name, model.name)
 
@@ -29,7 +30,7 @@ def train_and_evaluate_model(config, model_architecture, train_index, val_index,
         train_ds,
         val_dataset=val_ds,
         epochs=EPOCHS,
-        callbacks=[EarlyStopping(patience=10, monitor='val_loss', restore_best_weights=True, verbose=1)]
+        callbacks=[callbacks.EarlyStopping(patience=10, monitor='val_loss', restore_best_weights=True, verbose=1)]
     )
 
     print_evaluation(fold, strategy_name, model.name, IN_DISTRIBUTION_LABEL)
@@ -73,15 +74,16 @@ def evaluate_corruptions(model, strategy_name, model_name, training_time, fold):
 
 def experiment():
     set_memory_growth(tf)
+    gpus = tf.config.list_physical_devices('GPU')
+    print("GPUs available:", gpus)
 
     x_train, y_train, x_test, y_test, splits = get_cifar10_kfold_splits(KFOLD_N_SPLITS)
     experiments_config = filter_active(CONFIGS)
 
-    combinations = itertools.product(enumerate(experiments_config), MODEL_ARCHITECTURES, enumerate(splits))
+    combinations = itertools.product(enumerate(experiments_config), MODEL_ARCHITECTURES, splits)
 
     for (config_index, config), model_architecture, (fold, (train_index, val_index)) in combinations:
         fold_number = fold + 1
-        print(combinations)
         train_and_evaluate_model(
             config,
             model_architecture,
@@ -96,6 +98,4 @@ def experiment():
 
 
 if __name__ == "__main__":
-    p = multiprocessing.Process(target=experiment)
-    p.start()
-    p.join()
+    experiment()

@@ -3,7 +3,7 @@ from tensorflow.data import Dataset
 import keras_cv as keras_cv
 import tensorflow_datasets as tfds
 from lib.metrics import calculate_kl_divergence
-from keras.datasets import cifar10
+from keras import datasets, models
 from sklearn.model_selection import KFold
 from experiments_config import INPUT_SHAPE, BATCH_SIZE
 import numpy as np
@@ -24,8 +24,8 @@ def mixed_preprocess(image, label, augmentation_pipelines):
     augmented_image = tf.case([
         (tf.equal(random_index, i),
          lambda p=pipeline: apply_none() if p is None
-         else apply_augmentation(p if isinstance(p, tf.keras.Sequential)
-                                 else tf.keras.Sequential(p)))
+         else apply_augmentation(p if isinstance(p, models.Sequential)
+                                 else models.Sequential(p)))
         for i, pipeline in enumerate(augmentation_pipelines)
     ], exclusive=True)
 
@@ -36,7 +36,7 @@ def prepare(ds, shuffle=False, data_augmentation=None, mixed=False, input_shape=
     if input_shape is None:
         input_shape = INPUT_SHAPE
 
-    resize_and_rescale = tf.keras.Sequential([
+    resize_and_rescale = models.Sequential([
         keras_cv.layers.Resizing(input_shape[0], input_shape[1]),
         keras_cv.layers.Rescaling(1. / 255)
     ])
@@ -50,7 +50,7 @@ def prepare(ds, shuffle=False, data_augmentation=None, mixed=False, input_shape=
         ds = ds.shuffle(1000)
 
     if data_augmentation and not mixed:
-        data_augmentation_sequential = tf.keras.Sequential(data_augmentation)
+        data_augmentation_sequential = models.Sequential(data_augmentation)
         ds = ds.map(
             lambda x, y: (data_augmentation_sequential(x, training=True), y),
             num_parallel_calls=tf.data.AUTOTUNE
@@ -68,7 +68,7 @@ def prepare(ds, shuffle=False, data_augmentation=None, mixed=False, input_shape=
 
 
 def get_cifar10_kfold_splits(n_splits):
-    (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+    (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
 
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=0)
     dataset_splits = list(enumerate(kf.split(x_train, y_train)))

@@ -2,14 +2,14 @@ from layers.default_aug import get_default_aug_layers as DefaultAug
 from models.resnet50 import ResNet50Model
 from models.resnet101 import ResNet101Model
 from layers.salt_and_pepper import RandomSaltAndPepper
-import keras.layers as layers
-from keras_cv.core import UniformFactorSampler
+from keras import layers
+from keras_cv import core
 
 EPOCHS = 100
 BATCH_SIZE = 128
-INPUT_SHAPE = (32, 32, 3)
+INPUT_SHAPE = (72, 72, 3)
 KFOLD_N_SPLITS = 10
-SALTPEPPER_FACTOR = UniformFactorSampler(0, .5)
+SALTPEPPER_FACTOR = core.UniformFactorSampler(0, .5)
 
 
 MODEL_ARCHITECTURES = [
@@ -23,7 +23,7 @@ CONFIGS = [
         "strategy_name": 'Baseline',
         "data_augmentation_layers": [],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'Salt&Pepper',
