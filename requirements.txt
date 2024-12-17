@@ -3,10 +3,14 @@ pandas
 numpy
 tensorflow
 tensorflow-datasets
-scikit-learn
 matplotlib
 keras
 seaborn
 matplotlib
 keras_cv
 scipy
+nlpaug
+scikit-learn
+transformers
+nltk
+spacy

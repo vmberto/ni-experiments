@@ -1,4 +1,4 @@
-CORRUPTIONS = [
+CIFAR10_CORRUPTIONS = [
     'brightness_1',
     'brightness_2',
     'brightness_3',
@@ -94,6 +94,17 @@ CORRUPTIONS = [
     'zoom_blur_3',
     'zoom_blur_4',
     'zoom_blur_5',
+]
+
+AGNEWS_CORRUPTIONS = [
+    'typo',
+    'whitespace',
+    'synonym',
+    'deletion',
+    'sentence_noise_injection',
+    'case_randomization',
+    'entity_masking',
+    'back_translation',
 ]
 
 IN_DISTRIBUTION_LABEL = 'in-distribution'

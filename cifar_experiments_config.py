@@ -1,16 +1,17 @@
+from dataset.cifar10dataset import Cifar10Dataset
+from experiment import experiment
+from lib.consts import CIFAR10_CORRUPTIONS
 from layers.default_aug import get_default_aug_layers as DefaultAug
 from models.resnet50 import ResNet50Model
 from models.resnet101 import ResNet101Model
-from layers.salt_and_pepper import RandomSaltAndPepper
+from layers.random_salt_and_pepper import RandomSaltAndPepper
 from keras import layers
-from keras_cv import core
 
-EPOCHS = 100
 BATCH_SIZE = 128
 INPUT_SHAPE = (72, 72, 3)
 KFOLD_N_SPLITS = 10
-SALTPEPPER_FACTOR = core.UniformFactorSampler(0, .5)
-
+SALT_PEPPER_FACTOR = .5
+Dataset = Cifar10Dataset
 
 MODEL_ARCHITECTURES = [
     ResNet50Model,
@@ -27,7 +28,7 @@ CONFIGS = [
     },
     {
         "strategy_name": 'Salt&Pepper',
-        "data_augmentation_layers": [RandomSaltAndPepper(SALTPEPPER_FACTOR)],
+        "data_augmentation_layers": [RandomSaltAndPepper(SALT_PEPPER_FACTOR)],
         "mixed": False,
         "active": False,
     },
@@ -47,7 +48,7 @@ CONFIGS = [
         "strategy_name": 'DefaultAug+S&P',
         "data_augmentation_layers": [
             *DefaultAug(),
-            RandomSaltAndPepper(SALTPEPPER_FACTOR),
+            RandomSaltAndPepper(SALT_PEPPER_FACTOR),
         ],
         "mixed": False,
         "active": False,
@@ -72,10 +73,12 @@ CONFIGS = [
             ],
             [
                 *DefaultAug(),
-                RandomSaltAndPepper(SALTPEPPER_FACTOR),
+                RandomSaltAndPepper(SALT_PEPPER_FACTOR),
             ],
         ],
         "mixed": True,
         "active": False,
     },
 ]
+
+experiment(Dataset, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CIFAR10_CORRUPTIONS)

@@ -1,7 +1,7 @@
 from layers.default_aug import get_default_aug_layers as DefaultAug
 from models.resnet50 import ResNet50Model
 from models.xception import XceptionModel
-from layers.salt_and_pepper import RandomSaltAndPepper
+from old.salt_and_pepper import RandomSaltAndPepper
 import keras.layers as layers
 from keras_cv.core import UniformFactorSampler
 
