@@ -5,6 +5,7 @@ import numpy as np
 import tensorflow_datasets as tfds
 from keras import layers
 from keras import models
+import pandas as pd
 
 
 class AGNewsDataset:
@@ -93,6 +94,12 @@ class AGNewsDataset:
                 augmented_X.append(augmented_text)
         return self.prepare(Dataset.from_tensor_slices((X, y)), data_augmentation=da_layers, mixed=mixed)
 
-    def get_corrupted(self, corruption_fn, X_test):
-        corrupted_texts = corruption_fn(X_test)
-        return self.prepare(Dataset.from_tensor_slices((corrupted_texts, np.zeros(len(corrupted_texts)))))
+    def get_corrupted(self, corruption_name):
+        filepath = f'./dataset/agnewsdataset-c/ag_news_{corruption_name}.csv'
+        df = pd.read_csv(filepath)
+
+        labels = df['label'].tolist()
+        texts = df['text'].tolist()
+
+        return self.prepare(tf.data.Dataset.from_tensor_slices(texts, labels))
+

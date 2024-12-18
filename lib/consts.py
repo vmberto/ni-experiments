@@ -97,14 +97,16 @@ CIFAR10_CORRUPTIONS = [
 ]
 
 AGNEWS_CORRUPTIONS = [
-    'typo',
-    'whitespace',
-    'synonym',
-    'deletion',
-    'sentence_noise_injection',
-    'case_randomization',
-    'entity_masking',
-    'back_translation',
+    'typo_1', 'typo_2', 'typo_3', 'typo_4', 'typo_5',
+    'whitespace_1', 'whitespace_2', 'whitespace_3', 'whitespace_4', 'whitespace_5',
+    'synonym_1', 'synonym_2', 'synonym_3', 'synonym_4', 'synonym_5',
+    'deletion_1', 'deletion_2', 'deletion_3', 'deletion_4', 'deletion_5',
+    'sentence_noise_injection_1', 'sentence_noise_injection_2', 'sentence_noise_injection_3',
+    'sentence_noise_injection_4', 'sentence_noise_injection_5',
+    'case_randomization_1', 'case_randomization_2', 'case_randomization_3',
+    'case_randomization_4', 'case_randomization_5',
+    'entity_masking_1', 'entity_masking_2', 'entity_masking_3', 'entity_masking_4', 'entity_masking_5',
+    # 'back_translation_1', 'back_translation_2', 'back_translation_3', 'back_translation_4', 'back_translation_5',
 ]
 
 IN_DISTRIBUTION_LABEL = 'in-distribution'

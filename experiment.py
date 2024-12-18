@@ -24,7 +24,7 @@ def train_and_evaluate_model(config, dataset, model_architecture, train_index, v
     _, training_time = model.fit(
         train_ds,
         val_dataset=val_ds,
-        epochs=10,
+        epochs=1,
         callbacks=[callbacks.EarlyStopping(patience=10, monitor='val_loss', restore_best_weights=True, verbose=1)]
     )
 
@@ -44,7 +44,7 @@ def train_and_evaluate_model(config, dataset, model_architecture, train_index, v
         report,
     )
 
-    # evaluate_corruptions(model, dataset, strategy_name, model.name, training_time, fold, corruptions)
+    evaluate_corruptions(model, dataset, strategy_name, model.name, training_time, fold, corruptions)
 
 
 def evaluate_corruptions(model, dataset, strategy_name, model_name, training_time, fold, corruptions):

@@ -10,7 +10,7 @@ from keras import layers
 EPOCHS = 100
 BATCH_SIZE = 128
 KFOLD_N_SPLITS = 10
-SALT_PEPPER_FACTOR = .5
+SALT_PEPPER_FACTOR = .25
 Dataset = AGNewsDataset
 
 
@@ -46,7 +46,7 @@ CONFIGS = [
     },
     {
         "strategy_name": 'DefaultAug+S&P',
-        "data_augmentation_layers": [DefaultAug(), RandomSaltAndPepper(SALT_PEPPER_FACTOR - .25)],
+        "data_augmentation_layers": [DefaultAug(), RandomSaltAndPepper(SALT_PEPPER_FACTOR)],
         "mixed": False,
         "active": True,
     },
