@@ -1,9 +1,14 @@
 import string
 
+from pandas import read_csv
+
 from kldiv import compute_kl_divergence
+from frechet import compute_frechet_distance
+from lib.consts import AGNEWS_CORRUPTIONS
 from lvsd import compute_levenshtein_distance
 import tensorflow_datasets as tfds
 import pandas as pd
+import os
 import random
 import nltk
 from nltk.corpus import wordnet
@@ -307,5 +312,20 @@ def main():
             print(f"Saved: {output_path}")
 
 
+def calculate_distances():
+    ds = load_ag_news_from_tfds()
+
+    for name in AGNEWS_CORRUPTIONS:
+        corrupted_ds_path = f"{os.getcwd()}/ag_news_{name}.csv"
+        corrupted_ds = pd.read_csv(corrupted_ds_path)
+
+        original_texts = ds['text'].astype(str).tolist()
+        corrupted_texts = corrupted_ds['text'].astype(str).tolist()
+
+        distance = compute_frechet_distance(original_texts, corrupted_texts)
+
+        print(f'Distance of {name}: {distance}')
+
+
 if __name__ == "__main__":
-    main()
+    calculate_distances()

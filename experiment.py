@@ -24,7 +24,7 @@ def train_and_evaluate_model(config, dataset, model_architecture, train_index, v
     _, training_time = model.fit(
         train_ds,
         val_dataset=val_ds,
-        epochs=1,
+        epochs=100,
         callbacks=[callbacks.EarlyStopping(patience=10, monitor='val_loss', restore_best_weights=True, verbose=1)]
     )
 
@@ -68,7 +68,7 @@ def evaluate_corruptions(model, dataset, strategy_name, model_name, training_tim
 
 
 def experiment(Dataset, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CORRUPTIONS):
-    set_memory_growth(tf)
+    # set_memory_growth(tf)
 
     dataset = Dataset()
     experiments_config = filter_active(CONFIGS)

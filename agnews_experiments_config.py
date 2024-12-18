@@ -10,7 +10,7 @@ from keras import layers
 EPOCHS = 100
 BATCH_SIZE = 128
 KFOLD_N_SPLITS = 10
-SALT_PEPPER_FACTOR = .25
+SALT_PEPPER_FACTOR = .3
 Dataset = AGNewsDataset
 
 
@@ -24,25 +24,25 @@ CONFIGS = [
         "strategy_name": 'Baseline',
         "data_augmentation_layers": [],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'Salt&Pepper',
         "data_augmentation_layers": [RandomSaltAndPepper(SALT_PEPPER_FACTOR)],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'Gaussian',
         "data_augmentation_layers": [layers.GaussianNoise(.1)],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'DefaultAug',
         "data_augmentation_layers": [DefaultAug()],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'DefaultAug+S&P',
@@ -57,7 +57,7 @@ CONFIGS = [
             layers.GaussianNoise(.1),
         ],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     # {
     #     "strategy_name": 'Mixed',

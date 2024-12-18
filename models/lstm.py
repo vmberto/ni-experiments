@@ -31,7 +31,6 @@ class LSTMModel(ExperimentalModel):
                 layers.Embedding(
                     input_dim=self.vocab_size,
                     output_dim=self.embedding_dim,
-                    input_length=self.input_shape[0],
                 ),
                 layers.LSTM(128, return_sequences=False),
                 layers.Dense(64, activation='relu'),

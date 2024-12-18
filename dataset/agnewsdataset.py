@@ -22,9 +22,11 @@ class AGNewsDataset:
         )
 
     def preprocess_text(self, text):
+        print('preprocessing')
         return self.text_vectorizer(text)
 
     def prepare_text_vectorizer(self, ds):
+        print('adapting')
         text_ds = ds.map(lambda x, y: x).prefetch(buffer_size=tf.data.AUTOTUNE)
         self.text_vectorizer.adapt(text_ds)
 
@@ -88,6 +90,7 @@ class AGNewsDataset:
         da_layers = data_augmentation.copy() if data_augmentation is not None else data_augmentation
         nlpaug_pipeline = self.extract_nlpaug_augmentations(da_layers)
         if nlpaug_pipeline:
+            print('augmenting')
             augmented_X = []
             for text in X:
                 augmented_text = nlpaug_pipeline.augment(text)
@@ -96,10 +99,10 @@ class AGNewsDataset:
 
     def get_corrupted(self, corruption_name):
         filepath = f'./dataset/agnewsdataset-c/ag_news_{corruption_name}.csv'
-        df = pd.read_csv(filepath)
+
+        df = pd.read_csv(filepath, encoding='utf-8')
 
         labels = df['label'].tolist()
-        texts = df['text'].tolist()
+        texts = [str(text).encode('utf-8').decode('utf-8') for text in df['text'].tolist()]
 
-        return self.prepare(tf.data.Dataset.from_tensor_slices(texts, labels))
-
+        return self.prepare(tf.data.Dataset.from_tensor_slices((texts, labels)))
