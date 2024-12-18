@@ -10,8 +10,6 @@ from nltk.corpus import wordnet
 import re
 import spacy
 
-
-
 nltk.download('wordnet')
 
 
@@ -21,7 +19,7 @@ nltk.download('wordnet')
 def typo_injection(text, severity):
     """Introduce random typos by swapping adjacent characters."""
     text = list(text)
-    num_typos = severity
+    num_typos = severity * 12
     for _ in range(num_typos):
         if len(text) < 2:
             break
@@ -56,7 +54,7 @@ def whitespace_noise(text, severity):
                 words[idx] = word[:split_pos] + " " + word[split_pos:]
 
     corrupted_text = " ".join(words)
-    corrupted_text = re.sub(r"\s+", lambda m: " " * random.randint(1, severity), corrupted_text)
+    corrupted_text = re.sub(r"\s+", lambda m: " " * random.randint(1, severity * 5), corrupted_text)
     return corrupted_text
 
 
@@ -86,7 +84,7 @@ def case_randomization(text, severity):
 def synonym_replacement(text, severity):
     """Replace words with their synonyms."""
     words = text.split()
-    for _ in range(severity):
+    for _ in range(severity * 20):
         if not words:
             break
         idx = random.randint(0, len(words) - 1)
@@ -100,7 +98,7 @@ def synonym_replacement(text, severity):
 def random_word_deletion(text, severity):
     """Randomly delete words based on severity."""
     words = text.split()
-    num_deletions = severity
+    num_deletions = severity * 20
     for _ in range(num_deletions):
         if words:
             del words[random.randint(0, len(words) - 1)]
@@ -122,7 +120,7 @@ def sentence_noise_injection(text, severity):
         str: Text with noise tokens injected.
     """
     words = text.split()
-    num_noise_tokens = severity * max(1, len(words) // 10)  # Proportional to severity
+    num_noise_tokens = severity * max(1, len(words) // 10) * 20  # Proportional to severity
 
     noise_types = ["gibberish", "symbols", "numbers", "random_word"]
 
@@ -188,13 +186,15 @@ def entity_masking(text, severity):
 
     return masked_text
 
+
 # BACKTRANSLATION
 # from transformers import MarianMTModel, MarianTokenizer
 # import random
 #
-# LANGUAGES = ["en", "pt", "de", "fr", "es", "it"]
+# LANGUAGES = ["en", "de", "fr", "es", "it", "zh"]
 #
 #
+# # Function to load the translation model
 # def load_translation_model(src_lang, tgt_lang):
 #     model_name = f"Helsinki-NLP/opus-mt-{src_lang}-{tgt_lang}"
 #     tokenizer = MarianTokenizer.from_pretrained(model_name)
@@ -202,49 +202,61 @@ def entity_masking(text, severity):
 #     return model, tokenizer
 #
 #
-# # Back Translation with Multiple Languages
-# def multi_lang_back_translation(text, severity):
+# def translate_texts(texts, src_lang, tgt_lang):
 #     """
-#     Translates text through multiple languages (randomly chosen from a list).
-#     The number of languages in the chain is controlled by severity.
+#     Translates a list of texts from src_lang to tgt_lang.
 #
 #     Args:
-#         text (str): The input text to be paraphrased.
-#         severity (int): Number of intermediate translations (1 to 5).
+#         texts (list of str): List of input texts.
+#         src_lang (str): Source language code.
+#         tgt_lang (str): Target language code.
 #
 #     Returns:
-#         str: Paraphrased text after multi-language back translation.
+#         list of str: Translated texts.
 #     """
-#     # Select the languages for back-translation chain
+#     print(f"Translating {len(texts)} texts from {src_lang} to {tgt_lang}...")
+#     model, tokenizer = load_translation_model(src_lang, tgt_lang)
+#     translated_texts = []
+#
+#     for text in texts:
+#         inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512, padding=True)
+#         outputs = model.generate(**inputs)
+#         translated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+#         translated_texts.append(translated_text)
+#
+#     return translated_texts
+#
+#
+# def back_translate_dataset(texts, severity):
+#     """
+#     Applies back-translation to all texts based on severity level.
+#
+#     Args:
+#         texts (list of str): List of input texts.
+#         severity (int): Severity level (1 to 5).
+#
+#     Returns:
+#         list of str: Back-translated texts.
+#     """
+#     # Define the language chain
 #     lang_chain = ["en"]  # Start with English
 #     intermediate_langs = LANGUAGES[1:]  # Exclude English
-#     lang_chain += random.sample(intermediate_langs, severity)  # Add intermediate langs
+#     lang_chain += random.sample(intermediate_langs, severity)  # Add intermediate languages
 #
 #     if lang_chain[-1] != "en":
-#         lang_chain.append("en")  # Ensure final translation returns to English
-#
-#     paraphrased_text = text
+#         lang_chain.append("en")  # Ensure the final translation returns to English
 #
 #     print(f"Back-translation chain: {' → '.join(lang_chain)}")
 #
-#     # Iterate through the language chain
+#     # Apply translation chain to all texts
 #     for i in range(len(lang_chain) - 1):
 #         src_lang = lang_chain[i]
 #         tgt_lang = lang_chain[i + 1]
-#         print(f"Translating from {src_lang} to {tgt_lang}")
+#         texts = translate_texts(texts, src_lang, tgt_lang)
 #
-#         # Load forward translation model
-#         model, tokenizer = load_translation_model(src_lang, tgt_lang)
-#         inputs = tokenizer(paraphrased_text, return_tensors="pt", truncation=True, max_length=512)
-#         outputs = model.generate(**inputs)
-#         paraphrased_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-#
-#     return paraphrased_text
+#     return texts
 
 
-# Add other corruption functions here as needed...
-
-# Load Dataset
 def load_ag_news_from_tfds():
     dataset = tfds.load("ag_news_subset", split="test", as_supervised=True)
     test_texts, test_labels = [], []
@@ -272,14 +284,12 @@ def main():
     corruptions = {
         # "typo": typo_injection,
         # "whitespace": whitespace_noise,
+        # "case_randomization": case_randomization,
         # "synonym": synonym_replacement,
         # "deletion": random_word_deletion,
         # "sentence_noise_injection": sentence_noise_injection,
-        # "case_randomization": case_randomization,
-        "entity_masking": entity_masking,
-        # "back_translation": multi_lang_back_translation,
-        # XXXX "word_shuffling": word_shuffling, # 0 KL Divergence
-
+        # "entity_masking": entity_masking,
+        # "back_translation": back_translate_dataset,
     }
 
     for name, func in corruptions.items():
