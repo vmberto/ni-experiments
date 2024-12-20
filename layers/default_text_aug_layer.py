@@ -5,13 +5,13 @@ import nlpaug.flow as naf
 # Define augmentations
 
 # RandomFlip Equivalent: Random word swap
-random_swap_aug = naw.RandomWordAug(action="swap", name="Random_Swap_Aug", aug_min=1, aug_max=3, aug_p=0.3)
+random_swap_aug = naw.RandomWordAug(action="swap", name="Random_Swap_Aug", aug_min=1, aug_max=10, aug_p=0.3)
 
 # RandomRotation Equivalent: Synonym replacement
-synonym_aug = naw.SynonymAug(aug_src="wordnet", name="Synonym_Aug", aug_min=1, aug_max=3, aug_p=0.3)
+synonym_aug = naw.SynonymAug(aug_src="wordnet", name="Synonym_Aug", aug_min=1, aug_max=10, aug_p=0.3)
 
 # RandomZoom Equivalent: Random word deletion
-random_delete_aug = naw.RandomWordAug(action="delete", name="Random_Delete_Aug", aug_min=1, aug_max=3, aug_p=0.3)
+random_delete_aug = naw.RandomWordAug(action="delete", name="Random_Delete_Aug", aug_min=1, aug_max=10, aug_p=0.3)
 
 
 def get_default_aug_layers():

@@ -13,7 +13,7 @@ rcParams['xtick.labelsize'] = 26  # X tick font size
 rcParams['ytick.labelsize'] = 26  # Y tick font size
 rcParams['legend.fontsize'] = 18  # Legend font size
 
-file_path = '../results/autoencoder_results_kldiv.csv'  # Replace with your actual file path
+file_path = '../results/cifar10/autoencoder_results_kldiv.csv'  # Replace with your actual file path
 data = pd.read_csv(file_path)
 
 
@@ -43,6 +43,8 @@ grouped_data = pd.DataFrame(bootstrap_results.tolist(), index=bootstrap_results.
 percentiles = grouped_data['mean'].rank(pct=True) * 100
 
 grouped_data['category'] = percentiles.apply(categorize_by_percentiles)
+
+grouped_data.to_csv('../output/cifar10-kld-out-of-distribution-characterization-table.csv')
 
 low_count = (percentiles <= 25).sum()
 mid_range_count = ((percentiles > 25) & (percentiles <= 75)).sum()

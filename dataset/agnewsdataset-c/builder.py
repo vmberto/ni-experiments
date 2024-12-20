@@ -1,9 +1,5 @@
 import string
-
-from pandas import read_csv
-
 from kldiv import compute_kl_divergence
-from frechet import compute_frechet_distance
 from lib.consts import AGNEWS_CORRUPTIONS
 from lvsd import compute_levenshtein_distance
 import tensorflow_datasets as tfds
@@ -16,7 +12,6 @@ import re
 import spacy
 
 nltk.download('wordnet')
-
 
 # -----------------------------
 # Character-Level Corruptions
@@ -100,6 +95,37 @@ def synonym_replacement(text, severity):
     return " ".join(words)
 
 
+def antonym_replacement(text, severity):
+    words = text.split()
+    for _ in range(severity * 20):
+        idx = random.randint(0, len(words) - 1)
+        antonyms = []
+        for syn in wordnet.synsets(words[idx]):
+            for lemma in syn.lemmas():
+                if lemma.antonyms():
+                    antonyms.append(lemma.antonyms()[0].name())
+        if antonyms:
+            words[idx] = random.choice(antonyms).replace("_", " ")
+    return " ".join(words)
+
+
+def random_word_insertion(text, severity):
+    words = text.split()
+    num_insertions = severity * 20
+
+    for _ in range(num_insertions):
+        idx = random.randint(0, len(words))
+        if words:
+            original_word = random.choice(words)
+            synonyms = wordnet.synsets(original_word)
+            if synonyms:
+                inserted_word = synonyms[0].lemmas()[0].name().replace("_", " ")
+                words.insert(idx, inserted_word)
+            else:
+                words.insert(idx, random.choice(["foo", "bar", "baz", "qux", "noise", "xyz", "zxy", "abc", "cba"]))
+    return " ".join(words)
+
+
 def random_word_deletion(text, severity):
     """Randomly delete words based on severity."""
     words = text.split()
@@ -107,6 +133,26 @@ def random_word_deletion(text, severity):
     for _ in range(num_deletions):
         if words:
             del words[random.randint(0, len(words) - 1)]
+    return " ".join(words)
+
+
+def word_order_shuffling(text, severity):
+    words = text.split()
+    if len(words) < 2:
+        return text  # Skip shuffling for short texts
+
+    # Calculate the number of words to shuffle based on severity
+    num_words_to_shuffle = max(1, int(len(words) * (severity / 5)))
+
+    # Randomly select words to shuffle
+    indices_to_shuffle = random.sample(range(len(words)), num_words_to_shuffle)
+    shuffled_words = [words[i] for i in indices_to_shuffle]
+    random.shuffle(shuffled_words)
+
+    # Replace the selected words in the original order with shuffled ones
+    for idx, shuffled_word in zip(indices_to_shuffle, shuffled_words):
+        words[idx] = shuffled_word
+
     return " ".join(words)
 
 
@@ -191,77 +237,6 @@ def entity_masking(text, severity):
 
     return masked_text
 
-
-# BACKTRANSLATION
-# from transformers import MarianMTModel, MarianTokenizer
-# import random
-#
-# LANGUAGES = ["en", "de", "fr", "es", "it", "zh"]
-#
-#
-# # Function to load the translation model
-# def load_translation_model(src_lang, tgt_lang):
-#     model_name = f"Helsinki-NLP/opus-mt-{src_lang}-{tgt_lang}"
-#     tokenizer = MarianTokenizer.from_pretrained(model_name)
-#     model = MarianMTModel.from_pretrained(model_name)
-#     return model, tokenizer
-#
-#
-# def translate_texts(texts, src_lang, tgt_lang):
-#     """
-#     Translates a list of texts from src_lang to tgt_lang.
-#
-#     Args:
-#         texts (list of str): List of input texts.
-#         src_lang (str): Source language code.
-#         tgt_lang (str): Target language code.
-#
-#     Returns:
-#         list of str: Translated texts.
-#     """
-#     print(f"Translating {len(texts)} texts from {src_lang} to {tgt_lang}...")
-#     model, tokenizer = load_translation_model(src_lang, tgt_lang)
-#     translated_texts = []
-#
-#     for text in texts:
-#         inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512, padding=True)
-#         outputs = model.generate(**inputs)
-#         translated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-#         translated_texts.append(translated_text)
-#
-#     return translated_texts
-#
-#
-# def back_translate_dataset(texts, severity):
-#     """
-#     Applies back-translation to all texts based on severity level.
-#
-#     Args:
-#         texts (list of str): List of input texts.
-#         severity (int): Severity level (1 to 5).
-#
-#     Returns:
-#         list of str: Back-translated texts.
-#     """
-#     # Define the language chain
-#     lang_chain = ["en"]  # Start with English
-#     intermediate_langs = LANGUAGES[1:]  # Exclude English
-#     lang_chain += random.sample(intermediate_langs, severity)  # Add intermediate languages
-#
-#     if lang_chain[-1] != "en":
-#         lang_chain.append("en")  # Ensure the final translation returns to English
-#
-#     print(f"Back-translation chain: {' → '.join(lang_chain)}")
-#
-#     # Apply translation chain to all texts
-#     for i in range(len(lang_chain) - 1):
-#         src_lang = lang_chain[i]
-#         tgt_lang = lang_chain[i + 1]
-#         texts = translate_texts(texts, src_lang, tgt_lang)
-#
-#     return texts
-
-
 def load_ag_news_from_tfds():
     dataset = tfds.load("ag_news_subset", split="test", as_supervised=True)
     test_texts, test_labels = [], []
@@ -292,9 +267,10 @@ def main():
         # "case_randomization": case_randomization,
         # "synonym": synonym_replacement,
         # "deletion": random_word_deletion,
+        # "insertion": random_word_insertion,
+        # "antonym": antonym_replacement,
         # "sentence_noise_injection": sentence_noise_injection,
-        # "entity_masking": entity_masking,
-        # "back_translation": back_translate_dataset,
+        "shuffling": word_order_shuffling,
     }
 
     for name, func in corruptions.items():
@@ -312,20 +288,55 @@ def main():
             print(f"Saved: {output_path}")
 
 
-def calculate_distances():
+def calculate_distances_with_characterization():
     ds = load_ag_news_from_tfds()
 
+    results = []
+
+    # Iterate over all corruptions
     for name in AGNEWS_CORRUPTIONS:
         corrupted_ds_path = f"{os.getcwd()}/ag_news_{name}.csv"
         corrupted_ds = pd.read_csv(corrupted_ds_path)
 
+        # Extract texts
         original_texts = ds['text'].astype(str).tolist()
         corrupted_texts = corrupted_ds['text'].astype(str).tolist()
 
-        distance = compute_frechet_distance(original_texts, corrupted_texts)
+        # Compute the distance
+        distance = compute_levenshtein_distance(original_texts, corrupted_texts)
+        average_distance = distance['average_distance']
 
-        print(f'Distance of {name}: {distance}')
+        # Append results
+        results.append({
+            "corruption": name,
+            "divergence": average_distance
+        })
+
+    # Convert results to a DataFrame
+    df = pd.DataFrame(results)
+
+    # Calculate percentiles for characterization
+    low_threshold = df["divergence"].quantile(0.25)
+    mid_threshold = df["divergence"].quantile(0.50)
+    high_threshold = df["divergence"].quantile(0.75)
+
+    def characterize(divergence):
+        if divergence < low_threshold:
+            return "Lowest"
+        elif divergence < mid_threshold and divergence < high_threshold:
+            return "Mid-Range"
+        else:
+            return "Highest"
+
+    # Add characterization column
+    df["characterization"] = df["divergence"].apply(characterize)
+
+    # Save the DataFrame to a CSV
+    output_path = "../../results/agnews/corruptions_characterization.csv"
+    df.to_csv(output_path, index=False)
+
+    print(f"Characterized CSV saved at {output_path}")
 
 
 if __name__ == "__main__":
-    calculate_distances()
+    calculate_distances_with_characterization()

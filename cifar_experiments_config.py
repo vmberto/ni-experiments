@@ -24,7 +24,7 @@ CONFIGS = [
         "strategy_name": 'Baseline',
         "data_augmentation_layers": [],
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
         "strategy_name": 'Salt&Pepper',
@@ -42,7 +42,7 @@ CONFIGS = [
         "strategy_name": 'DefaultAug',
         "data_augmentation_layers": DefaultAug(),
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'DefaultAug+S&P',

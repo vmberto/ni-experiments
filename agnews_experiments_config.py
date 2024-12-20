@@ -73,8 +73,8 @@ CONFIGS = [
     #             RandomSaltAndPepper(SALT_PEPPER_FACTOR),
     #         ],
     #     ],
-    #     "mixed": True,
-    #     "active": False,
+    #     "mixed": False,
+    #     "active": True,
     # },
 ]
 

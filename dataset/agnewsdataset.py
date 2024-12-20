@@ -89,13 +89,13 @@ class AGNewsDataset:
     def get(self, X, y, data_augmentation=None, mixed=False):
         da_layers = data_augmentation.copy() if data_augmentation is not None else data_augmentation
         nlpaug_pipeline = self.extract_nlpaug_augmentations(da_layers)
+        augmented_X = []
         if nlpaug_pipeline:
             print('augmenting')
-            augmented_X = []
             for text in X:
                 augmented_text = nlpaug_pipeline.augment(text)
-                augmented_X.append(augmented_text)
-        return self.prepare(Dataset.from_tensor_slices((X, y)), data_augmentation=da_layers, mixed=mixed)
+                augmented_X.append(*augmented_text)
+        return self.prepare(Dataset.from_tensor_slices((augmented_X if len(augmented_X) > 0 else X, y)), data_augmentation=da_layers, mixed=mixed)
 
     def get_corrupted(self, corruption_name):
         filepath = f'./dataset/agnewsdataset-c/ag_news_{corruption_name}.csv'
