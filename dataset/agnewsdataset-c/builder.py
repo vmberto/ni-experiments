@@ -303,7 +303,8 @@ def calculate_distances_with_characterization():
         corrupted_texts = corrupted_ds['text'].astype(str).tolist()
 
         # Compute the distance
-        distance = compute_kl_divergence(original_texts, corrupted_texts)
+        distance = compute_levenshtein_distance(original_texts, corrupted_texts)
+        distance = distance['average_distance']
 
         # Append results
         results.append({
@@ -313,25 +314,7 @@ def calculate_distances_with_characterization():
 
     # Convert results to a DataFrame
     df = pd.DataFrame(results)
-
-    # Calculate percentiles for characterization
-    low_threshold = df["divergence"].quantile(0.25)
-    mid_threshold = df["divergence"].quantile(0.75)
-
-    # Improved characterization function
-    def characterize(divergence):
-        if divergence <= low_threshold:
-            return "Lowest"
-        elif low_threshold < divergence <= mid_threshold:
-            return "Mid-Range"
-        else:
-            return "Highest"
-
-    # Add characterization column
-    df["characterization"] = df["divergence"].apply(characterize)
-
-    # Save the DataFrame to a CSV
-    output_path = "../../results/agnews/corruptions_characterization.csv"
+    output_path = "../../results/agnews/agnews_c_divergences.csv"
     df.to_csv(output_path, index=False)
 
     print(f"Characterized CSV saved at {output_path}")

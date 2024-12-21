@@ -44,7 +44,7 @@ percentiles = grouped_data['mean'].rank(pct=True) * 100
 
 grouped_data['category'] = percentiles.apply(categorize_by_percentiles)
 
-grouped_data.to_csv('../output/cifar10-kld-out-of-distribution-characterization-table.csv')
+grouped_data.to_csv('../results/cifar10/cifar_10_c_divergences_categories.csv')
 
 low_count = (percentiles <= 25).sum()
 mid_range_count = ((percentiles > 25) & (percentiles <= 75)).sum()
@@ -54,7 +54,7 @@ high_count = (percentiles > 75).sum()
 category_bootstrap = grouped_data.groupby('category')['mean'].apply(lambda x: bootstrap_ci(x.values))
 category_stats = pd.DataFrame(category_bootstrap.tolist(), index=category_bootstrap.index, columns=['mean', 'lower', 'upper'])
 
-plt.figure(figsize=(14, 10))  # Increase figure size for better readability
+plt.figure(figsize=(14, 10))
 
 # Plot CIFAR-10 reference point at (0%, 0)
 plt.scatter(0, 0, color='blue', s=120, label='CIFAR-10')  # Increase point size
@@ -108,5 +108,5 @@ plt.legend(loc='lower right')
 
 # Save plot and show
 plt.tight_layout()
-plt.savefig('../output/kld_percentiles_distances.pdf')
+plt.savefig('../results/cifar10/cifar_10_c_divergences_plot.pdf')
 plt.show()

@@ -1,6 +1,6 @@
 import tensorflow as tf
-from keras.applications import ResNet101
-from keras.models import Sequential
+from models.experimental_model import ExperimentalModel
+from keras import applications, models, layers
 from models.experimental_model import ExperimentalModel
 
 
@@ -11,16 +11,16 @@ class ResNet101Model(ExperimentalModel):
         self.name = 'ResNet101'
 
     def _build_model(self):
-        resnet50 = ResNet101(
+        resnet101 = applications.ResNet101(
             weights=None,
             include_top=True,
             input_shape=self.input_shape,
             classes=10,
         )
-        model = Sequential(
+        model = models.Sequential(
             [
-                tf.keras.layers.Input(self.input_shape),
-                resnet50,
+                layers.Input(self.input_shape),
+                resnet101,
             ]
         )
         return model

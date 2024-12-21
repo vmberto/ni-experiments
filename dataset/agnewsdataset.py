@@ -114,7 +114,6 @@ class AGNewsDataset:
             for text in X:
                 try:
                     augmented_text = nlpaug_pipeline.augment(text)
-                    print(augmented_text)
                     augmented_X.append(*augmented_text)
                 except ValueError as _e:
                     augmented_X.append(text)

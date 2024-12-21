@@ -7,14 +7,12 @@ from models.resnet101 import ResNet101Model
 from layers.random_salt_and_pepper import RandomSaltAndPepper
 from keras import layers
 
-BATCH_SIZE = 128
-INPUT_SHAPE = (72, 72, 3)
 KFOLD_N_SPLITS = 10
 SALT_PEPPER_FACTOR = .5
 Dataset = Cifar10Dataset
 
 MODEL_ARCHITECTURES = [
-    ResNet50Model,
+    # ResNet50Model,
     ResNet101Model,
 ]
 

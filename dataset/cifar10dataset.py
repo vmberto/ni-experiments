@@ -6,13 +6,12 @@ from keras import datasets, models
 from sklearn.model_selection import KFold
 import numpy as np
 from lib.metrics import calculate_kl_divergence
-from cifar_experiments_config import INPUT_SHAPE, BATCH_SIZE
 
 
 class Cifar10Dataset:
     AUTOTUNE = tf.data.AUTOTUNE
 
-    def __init__(self, input_shape=INPUT_SHAPE, batch_size=BATCH_SIZE):
+    def __init__(self, input_shape=(32, 32, 3), batch_size=128):
         self.input_shape = input_shape
         self.batch_size = batch_size
 
