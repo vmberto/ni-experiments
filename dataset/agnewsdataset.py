@@ -30,6 +30,25 @@ class AGNewsDataset:
         text_ds = ds.map(lambda x, y: x).prefetch(buffer_size=tf.data.AUTOTUNE)
         self.text_vectorizer.adapt(text_ds)
 
+    def mixed_preprocess(self, text, label, augmentation_pipeline):
+        random_index = tf.random.uniform((), minval=0, maxval=len(augmentation_pipeline), dtype=tf.int32)
+
+        def apply_none():
+            return tf.identity(text)
+
+        def apply_augmentation(pipeline):
+            return pipeline(text)
+
+        augmented_text = tf.case([
+            (tf.equal(random_index, i),
+             lambda p=pipeline: apply_none() if p is None
+             else apply_augmentation(p if isinstance(p, models.Sequential)
+                                     else models.Sequential(p)))
+            for i, pipeline in enumerate(augmentation_pipeline)
+        ], exclusive=True)
+
+        return augmented_text, label
+
     def prepare(self, ds, shuffle=False, data_augmentation=None, mixed=False):
         ds = ds.map(
             lambda x, y: (self.preprocess_text(x), y),
@@ -93,8 +112,13 @@ class AGNewsDataset:
         if nlpaug_pipeline:
             print('augmenting')
             for text in X:
-                augmented_text = nlpaug_pipeline.augment(text)
-                augmented_X.append(*augmented_text)
+                try:
+                    augmented_text = nlpaug_pipeline.augment(text)
+                    print(augmented_text)
+                    augmented_X.append(*augmented_text)
+                except ValueError as _e:
+                    augmented_X.append(text)
+
         return self.prepare(Dataset.from_tensor_slices((augmented_X if len(augmented_X) > 0 else X, y)), data_augmentation=da_layers, mixed=mixed)
 
     def get_corrupted(self, corruption_name):
