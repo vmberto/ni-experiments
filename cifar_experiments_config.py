@@ -2,7 +2,7 @@ from dataset.cifar10dataset import Cifar10Dataset
 from experiment import experiment
 from lib.consts import CIFAR10_CORRUPTIONS
 from layers.default_aug import get_default_aug_layers as DefaultAug
-from models.resnet50 import ResNet50Model
+# from models.resnet50 import ResNet50Model
 from models.resnet101 import ResNet101Model
 from layers.random_salt_and_pepper import RandomSaltAndPepper
 from keras import layers
@@ -28,13 +28,13 @@ CONFIGS = [
         "strategy_name": 'Salt&Pepper',
         "data_augmentation_layers": [RandomSaltAndPepper(SALT_PEPPER_FACTOR)],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'Gaussian',
         "data_augmentation_layers": [layers.GaussianNoise(.1)],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'DefaultAug',
@@ -49,7 +49,7 @@ CONFIGS = [
             RandomSaltAndPepper(SALT_PEPPER_FACTOR),
         ],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'DefaultAug+Gaussian',
@@ -58,7 +58,7 @@ CONFIGS = [
             layers.GaussianNoise(.1),
         ],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'Mixed',
@@ -75,7 +75,7 @@ CONFIGS = [
             ],
         ],
         "mixed": True,
-        "active": False,
+        "active": True,
     },
 ]
 

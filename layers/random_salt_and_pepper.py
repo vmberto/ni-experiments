@@ -4,7 +4,7 @@ from keras import layers
 
 class RandomSaltAndPepper(layers.Layer):
     """
-    A custom Keras layer that adds salt-and-pepper noise to images.
+    A custom Keras layer that adds salt-and-pepper noise to inputs.
 
     Args:
         factor (float): The probability of noise corruption. Should be in the range [0.0, 1.0].
