@@ -4,6 +4,7 @@ from lib.consts import AGNEWS_CORRUPTIONS
 from layers.default_text_aug_layer import get_default_aug_layers as DefaultAug
 from layers.default_text_aug_layer import get_default_aug_layers_mixed as DefaultAugMixed
 from models.lstm import LSTMModel
+from models.vanilla_rnn import VanillaRNNModel
 from layers.random_salt_and_pepper import RandomSaltAndPepper
 from keras import layers
 
@@ -16,7 +17,8 @@ Dataset = AGNewsDataset
 
 
 MODEL_ARCHITECTURES = [
-    LSTMModel,
+    # LSTMModel,
+    VanillaRNNModel,
 ]
 
 
@@ -25,19 +27,19 @@ CONFIGS = [
         "strategy_name": 'Baseline',
         "data_augmentation_layers": [],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'Salt&Pepper',
         "data_augmentation_layers": [RandomSaltAndPepper(SALT_PEPPER_FACTOR)],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'Gaussian',
         "data_augmentation_layers": [layers.GaussianNoise(.1)],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'DefaultAug',
