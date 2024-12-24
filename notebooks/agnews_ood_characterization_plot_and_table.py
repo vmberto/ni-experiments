@@ -36,7 +36,7 @@ def categorize_by_percentiles(pct_value):
         return 'Highest'
 
 
-bootstrap_results = data.groupby('corruption')['divergence'].apply(
+bootstrap_results = data.groupby('corruption_type')['divergence'].apply(
     lambda x: bootstrap_ci(x.values))
 
 grouped_data = pd.DataFrame(bootstrap_results.tolist(), index=bootstrap_results.index, columns=['mean', 'lower', 'upper'])
@@ -50,33 +50,26 @@ low_count = (percentiles <= 25).sum()
 mid_range_count = ((percentiles > 25) & (percentiles <= 75)).sum()
 high_count = (percentiles > 75).sum()
 
-# Calculate bootstrap CI for each category
 category_bootstrap = grouped_data.groupby('category')['mean'].apply(lambda x: bootstrap_ci(x.values))
 category_stats = pd.DataFrame(category_bootstrap.tolist(), index=category_bootstrap.index, columns=['mean', 'lower', 'upper'])
 
-plt.figure(figsize=(14, 10))  # Increase figure size for better readability
+plt.figure(figsize=(14, 10))
 
-# Plot CIFAR-10 reference point at (0%, 0)
-plt.scatter(0, 0, color='blue', s=140, label='AG-NEWS')  # Increase point size
-plt.text(0, -80, 'AG-NEWS', ha='center', color='blue', fontsize=22, fontweight='bold')  # Increase text size
+plt.scatter(0, 0, color='blue', s=140, label='AG-NEWS')
+plt.text(0, -80, 'AG-NEWS', ha='center', color='blue', fontsize=22, fontweight='bold')
 
-# Sort percentiles and mean values to plot a single, smooth line
 sorted_percentiles = percentiles.sort_values()
 sorted_means = grouped_data.loc[sorted_percentiles.index, 'mean']
 sorted_lower = grouped_data.loc[sorted_percentiles.index, 'lower']
 sorted_upper = grouped_data.loc[sorted_percentiles.index, 'upper']
 
-# Create a color gradient from light red to strong red
-colors = plt.cm.Reds(np.linspace(0.5, 1, len(sorted_percentiles)))  # Adjust the start to 0.3 for a lighter red start
+colors = plt.cm.Reds(np.linspace(0.5, 1, len(sorted_percentiles)))
 
-# Plot KL Divergence with error bars and gradient colors
 for i, (x, y, lower, upper) in enumerate(zip(sorted_percentiles, sorted_means, sorted_lower, sorted_upper)):
     plt.errorbar(x, y, fmt='o', color=colors[i], ecolor='gray', capsize=5, alpha=0.7)
 
-# Draw a single smooth line through CIFAR-10-C points without the gradient
 plt.plot(sorted_percentiles, sorted_means, linestyle='-', color='purple', label='AG-NEWS-C Trend')
 
-# Add range labels and corruption counts with confidence intervals
 text_y_position = grouped_data['upper'].max() - 100
 
 for category, pos in zip(['Lowest', 'Mid-Range', 'Highest'], [12.5, 50, 87.5]):
@@ -85,16 +78,14 @@ for category, pos in zip(['Lowest', 'Mid-Range', 'Highest'], [12.5, 50, 87.5]):
     lower = category_stats.loc[category, 'lower']
     upper = category_stats.loc[category, 'upper']
     plt.text(pos, text_y_position - 60,
-             f'{category}', ha='center', fontsize=22, fontweight='bold')  # Increase text size for categories
-    plt.text(pos, text_y_position - 0.25,  # Adjust position slightly below
+             f'{category}', ha='center', fontsize=22, fontweight='bold')
+    plt.text(pos, text_y_position - 0.25,
              f'{count} corruptions\n{int(mean)} ({int(lower)}, {int(upper)})',
-             ha='center', fontsize=22)  # Increase text size for details
+             ha='center', fontsize=22)
 
-# Vertical lines for percentile categories
 plt.axvline(x=25, color='grey', linestyle='--', linewidth=1)
 plt.axvline(x=75, color='grey', linestyle='--', linewidth=1)
 
-# Set x-axis and y-axis limits and labels
 plt.xlim(0, 101)
 plt.ylim(0)
 plt.xlabel('Percentiles')
@@ -102,10 +93,8 @@ plt.ylabel('Levenshtein Distance (AG-NEWS-C)')
 plt.xticks(ticks=[25, 75])
 plt.title('Distribution Across Percentiles')
 
-# Add a legend
 plt.legend(loc='center left')
 
-# Save plot and show
 plt.tight_layout()
 plt.savefig('../results/agnews/agnews_c_divergences_plot.pdf')
 plt.show()
