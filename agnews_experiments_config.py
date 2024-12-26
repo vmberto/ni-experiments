@@ -4,7 +4,7 @@ from lib.consts import AGNEWS_CORRUPTIONS
 from layers.default_text_aug_layer import get_default_aug_layers as DefaultAug
 from layers.default_text_aug_layer import get_default_aug_layers_mixed as DefaultAugMixed
 from models.lstm import LSTMModel
-from models.vanilla_rnn import VanillaRNNModel
+from models.gru import GRUModel
 from layers.random_salt_and_pepper import RandomSaltAndPepper
 from keras import layers
 
@@ -18,7 +18,7 @@ Dataset = AGNewsDataset
 
 MODEL_ARCHITECTURES = [
     # LSTMModel,
-    VanillaRNNModel,
+    GRUModel,
 ]
 
 

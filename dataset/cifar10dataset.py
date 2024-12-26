@@ -11,7 +11,7 @@ from lib.metrics import calculate_kl_divergence
 class Cifar10Dataset:
     AUTOTUNE = tf.data.AUTOTUNE
 
-    def __init__(self, input_shape=(32, 32, 3), batch_size=128):
+    def __init__(self, input_shape=(72, 72, 3), batch_size=128):
         self.input_shape = input_shape
         self.batch_size = batch_size
 
@@ -23,7 +23,6 @@ class Cifar10Dataset:
         ])
 
     def mixed_preprocess(self, image, label, augmentation_pipelines):
-        """Apply mixed augmentations."""
         image = tf.image.convert_image_dtype(image, tf.float32)
         random_index = tf.random.uniform((), minval=0, maxval=len(augmentation_pipelines), dtype=tf.int32)
 
@@ -44,7 +43,6 @@ class Cifar10Dataset:
         return augmented_image, label
 
     def prepare(self, ds, shuffle=False, data_augmentation=None, mixed=False):
-        """Prepare the dataset with optional shuffling and augmentations."""
         resize_and_rescale = self._resize_and_rescale()
 
         ds = ds.map(

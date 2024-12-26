@@ -2,7 +2,7 @@ from keras import models, layers
 from models.experimental_model import ExperimentalModel
 
 
-class VanillaRNNModel(ExperimentalModel):
+class GRUModel(ExperimentalModel):
     def __init__(
         self,
         input_shape=(128,),
@@ -12,7 +12,7 @@ class VanillaRNNModel(ExperimentalModel):
         strategy_name=""
     ):
         """
-        Initialize the vanilla RNN model.
+        Initialize the GRU-based model.
 
         Args:
             input_shape (tuple): Shape of the input sequences (sequence length,).
@@ -28,14 +28,14 @@ class VanillaRNNModel(ExperimentalModel):
             vocab_size=vocab_size,
             embedding_dim=embedding_dim
         )
-        self.name = "VanillaRNN"
+        self.name = "GRU"
 
     def _build_model(self):
         """
-        Build a Vanilla RNN (SimpleRNN) model.
+        Build a GRU model.
 
         Returns:
-            keras.Model: Compiled Vanilla RNN model.
+            keras.Model: Compiled GRU model.
         """
         model = models.Sequential(
             [
@@ -44,8 +44,8 @@ class VanillaRNNModel(ExperimentalModel):
                     input_dim=self.vocab_size,
                     output_dim=self.embedding_dim,
                 ),
-                # Replaced LSTM with SimpleRNN
-                layers.SimpleRNN(128, return_sequences=False),
+                # Replace SimpleRNN with GRU
+                layers.GRU(128, return_sequences=False),
                 layers.Dense(64, activation="relu"),
                 layers.Dense(self.num_classes, activation="softmax"),
             ]
