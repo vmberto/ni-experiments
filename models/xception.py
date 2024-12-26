@@ -6,8 +6,8 @@ from models.experimental_model import ExperimentalModel
 
 class XceptionModel(ExperimentalModel):
 
-    def __init__(self, input_shape=(32, 32, 3), num_classes=10, approach_name=''):
-        super().__init__(input_shape, num_classes, approach_name)
+    def __init__(self, input_shape=(32, 32, 3), num_classes=10, strategy_name=''):
+        super().__init__(input_shape, num_classes, strategy_name)
         self.name = 'Xception'
 
     def _build_model(self):

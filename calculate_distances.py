@@ -1,11 +1,11 @@
 import tensorflow as tf
 from dataset.cifar import get_dataset_for_autoencoder, prepare_cifar10_kfold_for_autoencoder, prepare_cifar10_c_with_distances
-from lib.consts import CORRUPTIONS_TYPES
+from lib.consts import CIFAR10_CORRUPTIONS
 from lib.gpu import set_memory_growth
 from models.autoencoder import Autoencoder
 import pandas as pd
 import multiprocessing
-from experiments_config import BATCH_SIZE, KFOLD_N_SPLITS, EPOCHS
+from cifar_experiments_config import BATCH_SIZE, KFOLD_N_SPLITS
 
 
 def main():
@@ -26,7 +26,7 @@ def main():
 
         autoencoder.fit(
             train_fold_ds,
-            epochs=EPOCHS,
+            epochs=100,
             batch_size=BATCH_SIZE,
             shuffle=True,
             validation_data=val_fold_ds,
@@ -37,7 +37,7 @@ def main():
 
         encoder = autoencoder.encoder
 
-        for corruption_type in CORRUPTIONS_TYPES:
+        for corruption_type in CIFAR10_CORRUPTIONS:
             kld = prepare_cifar10_c_with_distances(encoder, corruption_type, test_ds)
             result = {
                 "fold": fold,

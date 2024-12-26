@@ -1,4 +1,4 @@
-import tensorflow.keras.layers as layers
+from keras import layers
 
 
 def get_default_aug_layers():

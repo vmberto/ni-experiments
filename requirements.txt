@@ -1,12 +1,15 @@
 scikit-image
 pandas
 numpy
-tensorflow
+tensorflow==2.17.0
 tensorflow-datasets
-scikit-learn
 matplotlib
 keras
 seaborn
 matplotlib
 keras_cv
 scipy
+nlpaug
+scikit-learn
+nltk
+spacy

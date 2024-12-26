@@ -4,10 +4,12 @@ import time
 
 
 class ExperimentalModel:
-    def __init__(self, input_shape=(32, 32, 3), num_classes=10, approach_name=''):
+    def __init__(self, input_shape=(32, 32, 3), num_classes=10, vocab_size=20000, embedding_dim=128, strategy_name=''):
         self.input_shape = input_shape
         self.num_classes = num_classes
-        self.approach_name = approach_name
+        self.strategy_name = strategy_name
+        self.vocab_size = vocab_size
+        self.embedding_dim = embedding_dim
         self.model = self._build_model()
         self.compile()
 
