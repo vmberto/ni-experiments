@@ -5,30 +5,28 @@ from helpers import seaborn_styles, prepare_df, bootstrap_confidence_interval, m
 
 seaborn_styles(sns)
 
-RAW_RESULTS_PATH = '../results/cifar10/official_10folds_results_resnet50_xception.csv'
+# RAW_RESULTS_PATH = '../results/cifar10/official_10folds_results_resnet50_xception.csv'
+RAW_RESULTS_PATH = '../output/output.csv'
 CATEGORIES_DF_PATH = '../results/cifar10/cifar_10_c_divergences_categories.csv'
 
+
 def plot_results(df):
-    unique_values = df['model'].unique()
+    unique_models = df['model'].unique()
+    num_models = len(unique_models)
 
-    resnet_results = df[df['model'] == unique_values[0]]
-    xception_results = df[df['model'] == unique_values[1]]
+    fig, axes = plt.subplots(1, num_models, figsize=(11 * num_models, 10))
 
-    fig, axes = plt.subplots(1, 2, figsize=(22, 10))
+    if num_models == 1:
+        axes = [axes]
 
-    x_min = 0.3
-    x_max = 0.9
-
-    for i, plot in enumerate([
-        {"df": resnet_results, "model": "ResNet50"},
-        {"df": xception_results, "model": "Xception"}
-    ]):
+    for i, model_name in enumerate(unique_models):
+        model_results = df[df['model'] == model_name]
         ax = sns.pointplot(
-            data=plot['df'],
+            data=model_results,
+            linestyles='none',
             x='f1-score(weighted avg)',
             y='Severity',
             hue='strategy',
-            linestyles='none',
             markers=markers,
             dodge=0.7,
             err_kws={'linewidth': 3},
@@ -37,7 +35,11 @@ def plot_results(df):
         )
 
         ax.set_xlabel("F1-Score", fontsize=42)
-        ax.set_xlim(x_min, x_max)
+        ax.set_xlim(.4, .95)
+
+        ax.axhline(y=0.5, color='grey', linestyle='--', linewidth=1)
+        ax.axhline(y=1.5, color='grey', linestyle='--', linewidth=1)
+        ax.axhline(y=2.5, color='grey', linestyle='--', linewidth=1)
 
         if i == 0:
             ax.set_ylabel("Severity", fontsize=42)
@@ -45,25 +47,22 @@ def plot_results(df):
             ax.set_yticklabels([])
             ax.set_ylabel("")
 
-        ax.axhline(y=0.5, color='grey', linestyle='--', linewidth=1)
-        ax.axhline(y=1.5, color='grey', linestyle='--', linewidth=1)
-        ax.axhline(y=2.5, color='grey', linestyle='--', linewidth=1)
-        ax.tick_params(axis='x', labelsize=32)
+        ax.tick_params(axis='x', labelsize=24)
         ax.tick_params(axis='y', labelsize=24)
-        ax.set_title(plot['model'], fontsize=42)
+        ax.set_title(model_name, fontsize=42)
 
-        x_ticks = ax.get_xticks()
-        ax.set_xticks(x_ticks[1:-1])
-
-    axes[0].legend_.remove()
-    axes[1].legend_.remove()
+    for ax in axes:
+        ax.legend_.remove()
 
     handles, labels = ax.get_legend_handles_labels()
 
     for handle in handles:
-        handle.set_markersize(30)
+        handle.set_markersize(30)  # Increase the marker size
 
-    fig.legend(handles, labels, title="Strategy", loc='lower center', bbox_to_anchor=(0.5, -0.42), fontsize=42, title_fontsize=42, ncol=3)
+    fig.legend(
+        handles, labels, title="Strategy", loc='lower center',
+        bbox_to_anchor=(0.5, -0.42), fontsize=42, title_fontsize=42, ncol=3
+    )
     fig.suptitle('Distributions Domain Range', fontsize=50, y=1)
     plt.tight_layout()
     plt.savefig('../output/results_ci_each_domain.pdf', bbox_inches='tight')

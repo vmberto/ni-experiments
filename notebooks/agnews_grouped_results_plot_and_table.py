@@ -7,8 +7,8 @@ from helpers import seaborn_styles, markers, bootstrap_confidence_interval, prep
 
 seaborn_styles(sns)
 
-# RAW_RESULTS_PATH = '../output/output.csv'
 RAW_RESULTS_PATH = '../results/agnews/raw_lstm_all_strategies_result.csv'
+# RAW_RESULTS_PATH = '../output/output.csv'
 CATEGORIES_DF_PATH = '../results/agnews/agnews_c_divergences_categories.csv'
 
 
