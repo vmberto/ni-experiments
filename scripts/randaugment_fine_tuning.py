@@ -3,6 +3,7 @@ import keras_cv
 from models.resnet50 import ResNet50Model
 from keras import layers, datasets, applications, callbacks
 import numpy as np
+from layers.random_salt_and_pepper import RandomSaltAndPepper
 import keras
 
 ##############################################################################
@@ -42,7 +43,7 @@ def build_resnet50_cifar(input_shape=(72, 72, 3), num_classes=10):
 ##############################################################################
 # 3. Prepare a tf.data.Dataset pipeline with optional RandAugment
 ##############################################################################
-def prepare_dataset(x, y, randaugment_layer=None, batch_size=32, shuffle=False):
+def prepare_dataset(x, y, randaugment_layer=None, batch_size=32, shuffle=False, salt_pepper_layer=None):
     ds = tf.data.Dataset.from_tensor_slices((x, y))
     if shuffle:
         ds = ds.shuffle(buffer_size=len(x))
@@ -52,6 +53,12 @@ def prepare_dataset(x, y, randaugment_layer=None, batch_size=32, shuffle=False):
         def augment_map(image, label):
             # KerasCV RandAugment expects images in [0,1] if value_range=(0,1)
             image = randaugment_layer(image)
+            return image, label
+        ds = ds.map(augment_map, num_parallel_calls=tf.data.AUTOTUNE)
+
+    if salt_pepper_layer:
+        def augment_map(image, label):
+            image = salt_pepper_layer(image)
             return image, label
         ds = ds.map(augment_map, num_parallel_calls=tf.data.AUTOTUNE)
 
@@ -79,8 +86,9 @@ def train_and_evaluate(
         augmentations_per_image=randaug_params['augmentations_per_image'],
         magnitude=randaug_params['magnitude'],
         rate=randaug_params['rate'],
-        # rate=1.0 means each transform is always applied
     )
+
+    random_salt_pepper = RandomSaltAndPepper(max_factor=randaug_params['s&p_factor'])
 
     # 2) Build the ResNet50 model (no pretrained weights)
     model = build_resnet50_cifar()
@@ -89,6 +97,7 @@ def train_and_evaluate(
     train_ds = prepare_dataset(
         x_train, y_train,
         randaugment_layer=randaugment_augmenter,
+        salt_pepper_layer=random_salt_pepper,
         batch_size=batch_size,
         shuffle=True
     )
@@ -135,7 +144,7 @@ def main():
     # B) Define some RandAugment parameter combos
     param_candidates = [
         # {'augmentations_per_image': 2, 'magnitude': 0.2},
-        # {'augmentations_per_image': 3, 'magnitude': 0.3}, # BEST
+        # {'augmentations_per_image': 3, 'magnitude': 0.3}, # .88 BEST
         # {'augmentations_per_image': 4, 'magnitude': 0.4},
 
         # {'augmentations_per_image': 3, 'magnitude': 0.2, 'rate': .5}, # .8493
@@ -144,11 +153,27 @@ def main():
         #
         # {'augmentations_per_image': 3, 'magnitude': 0.3, 'rate': .5}, # .8438
         # {'augmentations_per_image': 3, 'magnitude': 0.3, 'rate': .75}, # .8512
-        {'augmentations_per_image': 3, 'magnitude': 0.3, 'rate': 1},
+        # {'augmentations_per_image': 3, 'magnitude': 0.3, 'rate': 1}, # .8714
 
-        {'augmentations_per_image': 3, 'magnitude': 0.4, 'rate': .5},
-        {'augmentations_per_image': 3, 'magnitude': 0.4, 'rate': .75},
-        {'augmentations_per_image': 3, 'magnitude': 0.4, 'rate': 1},
+        # {'augmentations_per_image': 3, 'magnitude': 0.4, 'rate': .5}, # .8668
+        # {'augmentations_per_image': 3, 'magnitude': 0.4, 'rate': .75}, # .8406
+        # {'augmentations_per_image': 3, 'magnitude': 0.4, 'rate': 1},  # .8703
+
+        # {'augmentations_per_image': 3, 'magnitude': 0.2, 'rate': 1}, # .8864
+        # {'augmentations_per_image': 3, 'magnitude': 0.3, 'rate': 1}, # .8786
+        # {'augmentations_per_image': 3, 'magnitude': 0.4, 'rate': 1}, # .8881
+
+        # AS A FIXED FACTOR
+        # {'augmentations_per_image': 3, 'magnitude': 0.3, 'rate': 1, 's&p_factor': .1}, # .8546
+        # {'augmentations_per_image': 3, 'magnitude': 0.3, 'rate': 1, 's&p_factor': .2}, # .8910
+        # {'augmentations_per_image': 3, 'magnitude': 0.3, 'rate': 1, 's&p_factor': .3}, # .8667
+
+        # AS A UNIFORM DISTRIBUTION
+        {'augmentations_per_image': 3, 'magnitude': 0.3, 'rate': 1, 's&p_factor': .1}, # .8635
+        {'augmentations_per_image': 3, 'magnitude': 0.3, 'rate': 1, 's&p_factor': .2}, # .8631
+        {'augmentations_per_image': 3, 'magnitude': 0.3, 'rate': 1, 's&p_factor': .3}, # .8835
+        # {'augmentations_per_image': 3, 'magnitude': 0.3, 'rate': 1, 's&p_factor': .4}, # .8859
+        # {'augmentations_per_image': 3, 'magnitude': 0.3, 'rate': 1, 's&p_factor': .5},
     ]
 
     best_acc = 0.0

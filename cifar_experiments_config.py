@@ -1,19 +1,22 @@
 from dataset.cifar10dataset import Cifar10Dataset
 from experiment import experiment
 from lib.consts import CIFAR10_CORRUPTIONS
-from layers.default_aug import get_default_aug_layers as DefaultAug
-# from models.resnet50 import ResNet50Model
-from models.resnet101 import ResNet101Model
+import keras_cv
+from models.resnet18 import ResNet18Model
 from layers.random_salt_and_pepper import RandomSaltAndPepper
+from layers.custom_gaussian_noise import CustomGaussianNoise
 from keras import layers
+from models.resnet50 import ResNet50Model
+
 
 KFOLD_N_SPLITS = 10
-SALT_PEPPER_FACTOR = .5
+SALT_PEPPER_FACTOR = .3
+GAUSSIAN_STDDEV = .2
 Dataset = Cifar10Dataset
-
+RandAugment = keras_cv.layers.RandAugment(value_range=(0, 1), augmentations_per_image=3, magnitude=0.3, rate=1)
 MODEL_ARCHITECTURES = [
-    # ResNet50Model,
-    ResNet101Model,
+    ResNet50Model,
+    # ResNet18Model,
 ]
 
 
@@ -26,57 +29,175 @@ CONFIGS = [
     },
     {
         "strategy_name": 'Salt&Pepper',
-        "data_augmentation_layers": [RandomSaltAndPepper(SALT_PEPPER_FACTOR)],
+        "data_augmentation_layers": [RandomSaltAndPepper(max_factor=SALT_PEPPER_FACTOR)],
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
         "strategy_name": 'Gaussian',
-        "data_augmentation_layers": [layers.GaussianNoise(.1)],
+        "data_augmentation_layers": [CustomGaussianNoise(max_stddev=GAUSSIAN_STDDEV)],
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
-        "strategy_name": 'DefaultAug',
-        "data_augmentation_layers": DefaultAug(),
+        "strategy_name": 'RandAugment',
+        "data_augmentation_layers": [RandAugment],
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
-        "strategy_name": 'DefaultAug+S&P',
+        "strategy_name": 'RandAugment+S&P',
         "data_augmentation_layers": [
-            *DefaultAug(),
-            RandomSaltAndPepper(SALT_PEPPER_FACTOR),
+            RandAugment,
+            RandomSaltAndPepper(max_factor=SALT_PEPPER_FACTOR),
         ],
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
-        "strategy_name": 'DefaultAug+Gaussian',
+        "strategy_name": 'RandAugment+Gaussian',
         "data_augmentation_layers": [
-            *DefaultAug(),
-            layers.GaussianNoise(.1),
+            RandAugment,
+            CustomGaussianNoise(max_stddev=GAUSSIAN_STDDEV),
         ],
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
         "strategy_name": 'Mixed',
         "data_augmentation_layers": [
-            None,
-            DefaultAug(),
+            [RandAugment],
             [
-                *DefaultAug(),
-                layers.GaussianNoise(.1),
+                RandAugment,
+                CustomGaussianNoise(max_stddev=GAUSSIAN_STDDEV),
             ],
             [
-                *DefaultAug(),
-                RandomSaltAndPepper(SALT_PEPPER_FACTOR),
+                RandAugment,
+                RandomSaltAndPepper(max_factor=SALT_PEPPER_FACTOR),
             ],
         ],
         "mixed": True,
+        "active": False,
+    },
+
+
+
+    # Finetuning
+    {
+        "strategy_name": 'RandAugment+S&P/Fixed.3',
+        "data_augmentation_layers": [
+            RandAugment,
+            RandomSaltAndPepper(factor=.3),
+        ],
+        "mixed": False,
         "active": True,
     },
+    {
+        "strategy_name": 'RandAugment+S&P/Fixed.4',
+        "data_augmentation_layers": [
+            RandAugment,
+            RandomSaltAndPepper(factor=.4),
+        ],
+        "mixed": False,
+        "active": True,
+    },
+    {
+        "strategy_name": 'RandAugment+S&P/Fixed.5',
+        "data_augmentation_layers": [
+            RandAugment,
+            RandomSaltAndPepper(factor=.5),
+        ],
+        "mixed": False,
+        "active": True,
+    },
+    {
+        "strategy_name": 'RandAugment+S&P/Distribution.3',
+        "data_augmentation_layers": [
+            RandAugment,
+            RandomSaltAndPepper(max_factor=.3),
+        ],
+        "mixed": False,
+        "active": True,
+    },
+    {
+        "strategy_name": 'RandAugment+S&P/Distribution.4',
+        "data_augmentation_layers": [
+            RandAugment,
+            RandomSaltAndPepper(max_factor=.4),
+        ],
+        "mixed": False,
+        "active": True,
+    },
+    {
+        "strategy_name": 'RandAugment+S&P/Distribution.5',
+        "data_augmentation_layers": [
+            RandAugment,
+            RandomSaltAndPepper(max_factor=.5),
+        ],
+        "mixed": False,
+        "active": True,
+    },
+
+
+
+
+
+    # Finetuning Gaussian
+    {
+        "strategy_name": 'RandAugment+Gaussian/Fixed.2',
+        "data_augmentation_layers": [
+            RandAugment,
+            layers.GaussianNoise(.2),
+        ],
+        "mixed": False,
+        "active": False,
+    },
+    {
+        "strategy_name": 'RandAugment+Gaussian/Fixed.3',
+        "data_augmentation_layers": [
+            RandAugment,
+            layers.GaussianNoise(.3),
+        ],
+        "mixed": False,
+        "active": False,
+    },
+    {
+        "strategy_name": 'RandAugment+Gaussian/Fixed.4',
+        "data_augmentation_layers": [
+            RandAugment,
+            layers.GaussianNoise(.4),
+        ],
+        "mixed": False,
+        "active": False,
+    },
+    {
+        "strategy_name": 'RandAugment+Gaussian/Distribution.2',
+        "data_augmentation_layers": [
+            RandAugment,
+            CustomGaussianNoise(max_stddev=.2),
+        ],
+        "mixed": False,
+        "active": False,
+    },
+    {
+        "strategy_name": 'RandAugment+Gaussian/Distribution.3',
+        "data_augmentation_layers": [
+            RandAugment,
+            CustomGaussianNoise(max_stddev=.3),
+        ],
+        "mixed": False,
+        "active": False,
+    },
+    {
+        "strategy_name": 'RandAugment+Gaussian/Distribution.4',
+        "data_augmentation_layers": [
+            RandAugment,
+            CustomGaussianNoise(max_stddev=.4),
+        ],
+        "mixed": False,
+        "active": False,
+    },
+
 ]
 
 experiment(Dataset, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CIFAR10_CORRUPTIONS)
