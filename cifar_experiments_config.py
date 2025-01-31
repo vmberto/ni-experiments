@@ -84,6 +84,15 @@ CONFIGS = [
 
     # Finetuning
     {
+        "strategy_name": 'RandAugment+S&P/Fixed.2',
+        "data_augmentation_layers": [
+            RandAugment,
+            RandomSaltAndPepper(factor=.2),
+        ],
+        "mixed": False,
+        "active": False,
+    },
+    {
         "strategy_name": 'RandAugment+S&P/Fixed.3',
         "data_augmentation_layers": [
             RandAugment,
@@ -102,10 +111,10 @@ CONFIGS = [
         "active": True,
     },
     {
-        "strategy_name": 'RandAugment+S&P/Fixed.5',
+        "strategy_name": 'RandAugment+S&P/Distribution.2',
         "data_augmentation_layers": [
             RandAugment,
-            RandomSaltAndPepper(factor=.5),
+            RandomSaltAndPepper(max_factor=.2),
         ],
         "mixed": False,
         "active": True,
@@ -128,15 +137,6 @@ CONFIGS = [
         "mixed": False,
         "active": True,
     },
-    {
-        "strategy_name": 'RandAugment+S&P/Distribution.5',
-        "data_augmentation_layers": [
-            RandAugment,
-            RandomSaltAndPepper(max_factor=.5),
-        ],
-        "mixed": False,
-        "active": True,
-    },
 
 
 
@@ -150,7 +150,7 @@ CONFIGS = [
             layers.GaussianNoise(.2),
         ],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'RandAugment+Gaussian/Fixed.3',
@@ -159,7 +159,7 @@ CONFIGS = [
             layers.GaussianNoise(.3),
         ],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'RandAugment+Gaussian/Fixed.4',
@@ -168,7 +168,7 @@ CONFIGS = [
             layers.GaussianNoise(.4),
         ],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'RandAugment+Gaussian/Distribution.2',
@@ -177,7 +177,7 @@ CONFIGS = [
             CustomGaussianNoise(max_stddev=.2),
         ],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'RandAugment+Gaussian/Distribution.3',
@@ -186,7 +186,7 @@ CONFIGS = [
             CustomGaussianNoise(max_stddev=.3),
         ],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'RandAugment+Gaussian/Distribution.4',
@@ -195,7 +195,7 @@ CONFIGS = [
             CustomGaussianNoise(max_stddev=.4),
         ],
         "mixed": False,
-        "active": False,
+        "active": True,
     },
 
 ]

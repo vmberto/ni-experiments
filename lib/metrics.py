@@ -85,7 +85,7 @@ def convert_dict(data_dict):
 def write_fscore_result(
         evauation_set, strategy_name, model_name,
         training_time, fold_number, loss, acc,
-        report
+        report, epochs_run
 ):
     csv_file = f'{os.getcwd()}/output/output.csv'
 
@@ -100,6 +100,7 @@ def write_fscore_result(
         'fold': fold_number,
         'accuracy': acc,
         'loss': loss,
+        'epochs_run': epochs_run,
         **dict_report,
     }
 

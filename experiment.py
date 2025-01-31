@@ -10,7 +10,7 @@ from lib.gpu import reset_tensorflow_keras_backend
 import gc
 
 
-def train_and_evaluate_model(config, dataset, model_architecture, train_index, val_index, x_train, y_train, x_test, y_test, fold, corruptions, results):
+def train_and_evaluate_model(config, dataset, model_architecture, train_index, val_index, x_train, y_train, x_test, y_test, fold, corruptions):
     strategy_name = config['strategy_name']
     data_augmentation_layers = config['data_augmentation_layers']
     mixed = config['mixed']
@@ -30,13 +30,7 @@ def train_and_evaluate_model(config, dataset, model_architecture, train_index, v
         callbacks=[callbacks.EarlyStopping(patience=10, monitor='val_loss', restore_best_weights=True, verbose=1)]
     )
 
-    key = f"{strategy_name} with Model {model.name}"
-    if key not in results:
-        results[key] = {}
-    results[key][f'Fold {fold}'] = {
-        "loss": history.history['loss'],
-        "val_loss": history.history['val_loss'],
-    }
+    num_epochs_run = len(history.history['loss'])
 
     print_evaluation(fold, strategy_name, model.name, IN_DISTRIBUTION_LABEL)
 
@@ -52,12 +46,19 @@ def train_and_evaluate_model(config, dataset, model_architecture, train_index, v
         loss,
         acc,
         report,
+        epochs_run=num_epochs_run
     )
 
-    evaluate_corruptions(model, dataset, strategy_name, model.name, training_time, fold, corruptions)
+    evaluate_corruptions(model, dataset, strategy_name, model.name, training_time, fold, corruptions, num_epochs_run)
+
+    print(f"🧹 Clearing memory after Fold {fold}...")
+
+    del model
+    K.clear_session()
+    gc.collect()
 
 
-def evaluate_corruptions(model, dataset, strategy_name, model_name, training_time, fold, corruptions):
+def evaluate_corruptions(model, dataset, strategy_name, model_name, training_time, fold, corruptions, num_epochs_run):
     for corruption in corruptions:
         print_evaluation(fold, strategy_name, model_name, f'in {corruption}')
         corrupted_dataset = dataset.get_corrupted(corruption)
@@ -74,13 +75,13 @@ def evaluate_corruptions(model, dataset, strategy_name, model_name, training_tim
             loss,
             acc,
             report,
+            epochs_run=num_epochs_run
         )
 
 
 def experiment(Dataset, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CORRUPTIONS):
     dataset = Dataset()
     experiments_config = filter_active(CONFIGS)
-    results = {}
 
     x_train, y_train, x_test, y_test, splits = dataset.get_kfold_splits(KFOLD_N_SPLITS)
 
@@ -101,5 +102,4 @@ def experiment(Dataset, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CORRUPTION
             y_test,
             fold_number,
             CORRUPTIONS,
-            results
         )
