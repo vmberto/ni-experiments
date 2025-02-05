@@ -5,18 +5,18 @@ import tensorflow_datasets as tfds
 from keras import datasets, models
 from sklearn.model_selection import KFold
 import numpy as np
+from cifar_experiments_config import BATCH_SIZE
 from lib.metrics import calculate_kl_divergence
 
 
 class Cifar10Dataset:
     AUTOTUNE = tf.data.AUTOTUNE
 
-    def __init__(self, input_shape=(72, 72, 3), batch_size=128):
+    def __init__(self, input_shape=(72, 72, 3)):
         self.input_shape = input_shape
-        self.batch_size = batch_size
+        self.batch_size = BATCH_SIZE
 
     def _resize_and_rescale(self):
-        """Resizing and rescaling layers for preprocessing."""
         return models.Sequential([
             keras_cv.layers.Resizing(self.input_shape[0], self.input_shape[1]),
             keras_cv.layers.Rescaling(1. / 255)

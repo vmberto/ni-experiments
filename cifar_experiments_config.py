@@ -12,6 +12,7 @@ from models.resnet50 import ResNet50Model
 KFOLD_N_SPLITS = 10
 SALT_PEPPER_FACTOR = .3
 GAUSSIAN_STDDEV = .2
+BATCH_SIZE = 64
 Dataset = Cifar10Dataset
 RandAugment = keras_cv.layers.RandAugment(value_range=(0, 1), augmentations_per_image=3, magnitude=0.3, rate=1)
 MODEL_ARCHITECTURES = [
@@ -99,7 +100,7 @@ CONFIGS = [
             RandomSaltAndPepper(factor=.3),
         ],
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
         "strategy_name": 'RandAugment+S&P/Fixed.4',
@@ -108,7 +109,7 @@ CONFIGS = [
             RandomSaltAndPepper(factor=.4),
         ],
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
         "strategy_name": 'RandAugment+S&P/Distribution.2',
@@ -117,7 +118,7 @@ CONFIGS = [
             RandomSaltAndPepper(max_factor=.2),
         ],
         "mixed": False,
-        "active": True,
+        "active": False,
     },
     {
         "strategy_name": 'RandAugment+S&P/Distribution.3',
