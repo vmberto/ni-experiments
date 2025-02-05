@@ -1,25 +1,27 @@
 import tensorflow as tf
-from dataset.cifar import get_dataset_for_autoencoder, prepare_cifar10_kfold_for_autoencoder, prepare_cifar10_c_with_distances
+from dataset.cifar10dataset import Cifar10Dataset
 from lib.consts import CIFAR10_CORRUPTIONS
 from lib.gpu import set_memory_growth
+from keras import callbacks
 from models.autoencoder import Autoencoder
 import pandas as pd
 import multiprocessing
-from cifar_experiments_config import BATCH_SIZE, KFOLD_N_SPLITS
+from cifar_experiments_config import KFOLD_N_SPLITS
 
 
 def main():
     set_memory_growth(tf)
+    dataset = Cifar10Dataset()
 
-    x_train, x_test, splits = prepare_cifar10_kfold_for_autoencoder(KFOLD_N_SPLITS)
+    x_train, x_test, splits = dataset.prepare_cifar10_kfold_for_autoencoder(KFOLD_N_SPLITS)
     input_shape = x_train.shape[1:]
-    test_ds = get_dataset_for_autoencoder(x_test)
+    test_ds = dataset.get_dataset_for_autoencoder(x_test)
 
     results = []
 
     for fold, (train_index, val_index) in splits:
-        train_fold_ds = get_dataset_for_autoencoder(x_train[train_index])
-        val_fold_ds = get_dataset_for_autoencoder(x_train[val_index])
+        train_fold_ds = dataset.get_dataset_for_autoencoder(x_train[train_index])
+        val_fold_ds = dataset.get_dataset_for_autoencoder(x_train[val_index])
 
         autoencoder = Autoencoder(input_shape)
         autoencoder.compile(optimizer='adam', loss='mean_squared_error')
@@ -27,18 +29,17 @@ def main():
         autoencoder.fit(
             train_fold_ds,
             epochs=100,
-            batch_size=BATCH_SIZE,
             shuffle=True,
             validation_data=val_fold_ds,
             callbacks=[
-                tf.keras.callbacks.EarlyStopping(patience=10, monitor='val_loss', restore_best_weights=True, verbose=1)
+                callbacks.EarlyStopping(patience=10, monitor='val_loss', restore_best_weights=True, verbose=1)
             ]
         )
 
         encoder = autoencoder.encoder
 
         for corruption_type in CIFAR10_CORRUPTIONS:
-            kld = prepare_cifar10_c_with_distances(encoder, corruption_type, test_ds)
+            kld = dataset.prepare_cifar10_c_with_distances(encoder, corruption_type, test_ds)
             result = {
                 "fold": fold,
                 "corruption_type": corruption_type,
