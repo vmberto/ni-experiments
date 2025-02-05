@@ -19,12 +19,11 @@ class ExperimentalModel:
     def compile(self, optimizer='adam', loss='sparse_categorical_crossentropy', metrics='accuracy'):
         self.model.compile(optimizer=optimizer, loss=loss, metrics=[metrics])
 
-    def fit(self, train_dataset, val_dataset=None, callbacks=None, batch_size=32, epochs=10):
+    def fit(self, train_dataset, val_dataset=None, callbacks=None, epochs=10):
         start_time = time.time()
         history = self.model.fit(
             train_dataset,
             validation_data=val_dataset,
-            batch_size=batch_size,
             epochs=epochs,
             callbacks=callbacks,
         )
