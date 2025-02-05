@@ -4,10 +4,6 @@ from lib.consts import IN_DISTRIBUTION_LABEL
 from lib.logger import print_execution, print_evaluation
 from keras import callbacks
 from lib.functions import filter_active
-import tensorflow as tf
-from keras import backend as K
-from lib.gpu import reset_tensorflow_keras_backend
-import gc
 
 
 def train_and_evaluate_model(config, dataset, model_architecture, train_index, val_index, x_train, y_train, x_test, y_test, fold, corruptions):
@@ -51,12 +47,6 @@ def train_and_evaluate_model(config, dataset, model_architecture, train_index, v
 
     evaluate_corruptions(model, dataset, strategy_name, model.name, training_time, fold, corruptions, num_epochs_run)
 
-    print(f"🧹 Clearing memory after Fold {fold}...")
-
-    del model
-    K.clear_session()
-    gc.collect()
-
 
 def evaluate_corruptions(model, dataset, strategy_name, model_name, training_time, fold, corruptions, num_epochs_run):
     for corruption in corruptions:
@@ -88,7 +78,6 @@ def experiment(Dataset, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CORRUPTION
     combinations = itertools.product(enumerate(experiments_config), MODEL_ARCHITECTURES, splits)
 
     for (config_index, config), model_architecture, (fold, (train_index, val_index)) in combinations:
-        reset_tensorflow_keras_backend(tf, gc, K)
         fold_number = fold + 1
         train_and_evaluate_model(
             config,

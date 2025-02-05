@@ -11,9 +11,9 @@ from lib.metrics import calculate_kl_divergence
 class Cifar10Dataset:
     AUTOTUNE = tf.data.AUTOTUNE
 
-    def __init__(self, input_shape=(72, 72, 3)):
-        self.input_shape = input_shape
-        self.batch_size = 128
+    def __init__(self):
+        self.input_shape = (72, 72, 3)
+        self.batch_size = 64
 
     def _resize_and_rescale(self):
         return models.Sequential([
@@ -70,7 +70,6 @@ class Cifar10Dataset:
         return ds.prefetch(buffer_size=self.AUTOTUNE)
 
     def get_kfold_splits(self, n_splits):
-        """Generate K-Fold splits for CIFAR-10."""
         (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
 
         kf = KFold(n_splits=n_splits, shuffle=True, random_state=0)
@@ -79,20 +78,16 @@ class Cifar10Dataset:
         return x_train, y_train, x_test, y_test, dataset_splits
 
     def get(self, x, y, data_augmentation=None, mixed=False):
-        """Get a processed CIFAR-10 dataset."""
         return self.prepare(Dataset.from_tensor_slices((x, y)), data_augmentation=data_augmentation, mixed=mixed)
 
     def get_corrupted(self, corruption_type):
-        """Load and prepare a corrupted CIFAR-10 dataset."""
         cifar_10_c = tfds.load(f"cifar10_corrupted/{corruption_type}", split="test", as_supervised=True)
         return self.prepare(cifar_10_c)
 
     def get_dataset_for_autoencoder(self, x_data):
-        """Prepare CIFAR-10 data for autoencoder training."""
         return self.prepare(tf.data.Dataset.from_tensor_slices((x_data, x_data)))
 
     def prepare_cifar10_kfold_for_autoencoder(self, n_splits):
-        """Prepare K-Fold CIFAR-10 splits for autoencoder."""
         dataset_train = tfds.load('cifar10', split='train', as_supervised=True)
         dataset_test = tfds.load('cifar10', split='test', as_supervised=True)
 
@@ -108,7 +103,6 @@ class Cifar10Dataset:
         return x_train, x_test, dataset_splits
 
     def prepare_cifar10_c_with_distances(self, encoder, corruption_type, test_ds):
-        """Calculate KL divergence between clean and corrupted data."""
         dataset = tfds.load(f'cifar10_corrupted/{corruption_type}', split='test', as_supervised=True)
         x_corrupted = np.array([image for image, label in tfds.as_numpy(dataset)])
         x_corrupted = x_corrupted.astype('float32') / 255.0
