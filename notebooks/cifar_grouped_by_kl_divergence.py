@@ -1,13 +1,14 @@
 import seaborn as sns
-import pandas as pd
 import matplotlib.pyplot as plt
-from lib.helpers import seaborn_styles, markers, bootstrap_confidence_interval, prepare_df
+import pandas as pd
+from lib.helpers import seaborn_styles, prepare_df, bootstrap_confidence_interval, markers
 
 seaborn_styles(sns)
 
-RAW_RESULTS_PATH = '../results/agnews/raw_lstm_all_strategies_result.csv'
-# RAW_RESULTS_PATH = '../output/output.csv'
-CATEGORIES_DF_PATH = '../results/agnews/agnews_c_divergences_categories.csv'
+# RAW_RESULTS_PATH = '../old/official_10folds_results_resnet50_xception.csv'
+RAW_RESULTS_PATH = '../output/complete_resnet50_resnet18.csv'
+# RAW_RESULTS_PATH = '../output/gauss_dist_vs_fixed.csv'
+CATEGORIES_DF_PATH = '../results/cifar10/cifar_10_c_divergences_categories.csv'
 
 
 def plot_results(df):
@@ -35,8 +36,8 @@ def plot_results(df):
         )
 
         ax.set_xlabel("F1-Score", fontsize=42)
-        ax.set_xlim(.5, 1)
-        
+        ax.set_xlim(.4, .95)
+
         ax.axhline(y=0.5, color='grey', linestyle='--', linewidth=1)
         ax.axhline(y=1.5, color='grey', linestyle='--', linewidth=1)
         ax.axhline(y=2.5, color='grey', linestyle='--', linewidth=1)
@@ -55,26 +56,26 @@ def plot_results(df):
         ax.legend_.remove()
 
     handles, labels = ax.get_legend_handles_labels()
-    
+
     for handle in handles:
         handle.set_markersize(30)  # Increase the marker size
-    
+
     fig.legend(
         handles, labels, title="Strategy", loc='lower center',
         bbox_to_anchor=(0.5, -0.42), fontsize=42, title_fontsize=42, ncol=3
     )
     fig.suptitle('Distributions Domain Range', fontsize=50, y=1)
     plt.tight_layout()
-    plt.savefig('../output/agnews_results_ci_each_domain.pdf', bbox_inches='tight')
+    plt.savefig('../output/cifar_results_by_kl_divergence.pdf', bbox_inches='tight')
     plt.show()
 
 
 results = pd.read_csv(RAW_RESULTS_PATH)
-merged_results = prepare_df(results, CATEGORIES_DF_PATH)
+results = prepare_df(results, CATEGORIES_DF_PATH)
 
-plot_results(merged_results)
+plot_results(results)
 
-grouped = merged_results.groupby(['model', 'strategy', 'Severity'])
+grouped = results.groupby(['model', 'strategy', 'Severity'])
 confidence_intervals = grouped['f1-score(weighted avg)'].apply(lambda x: bootstrap_confidence_interval(x.values))
 average_fscore = grouped['f1-score(weighted avg)'].mean()
 
@@ -86,3 +87,5 @@ confidence_intervals_df = pd.DataFrame({
 })
 
 print(confidence_intervals_df.to_latex())
+
+

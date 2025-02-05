@@ -1,12 +1,12 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
-from helpers import seaborn_styles, prepare_df, bootstrap_confidence_interval, markers
+from lib.helpers import seaborn_styles, prepare_df, bootstrap_confidence_interval, markers
 
 seaborn_styles(sns)
 
-# RAW_RESULTS_PATH = '../results/cifar10/official_10folds_results_resnet50_xception.csv'
-RAW_RESULTS_PATH = '../output/output.csv'
+# RAW_RESULTS_PATH = '../old/official_10folds_results_resnet50_xception.csv'
+RAW_RESULTS_PATH = '../output/gauss_dist_vs_fixed_resnet18.csv'
 CATEGORIES_DF_PATH = '../results/cifar10/cifar_10_c_divergences_categories.csv'
 
 
@@ -35,7 +35,7 @@ def plot_results(df):
         )
 
         ax.set_xlabel("F1-Score", fontsize=42)
-        ax.set_xlim(.4, .95)
+        ax.set_xlim(.35, .95)
 
         ax.axhline(y=0.5, color='grey', linestyle='--', linewidth=1)
         ax.axhline(y=1.5, color='grey', linestyle='--', linewidth=1)
@@ -65,7 +65,7 @@ def plot_results(df):
     )
     fig.suptitle('Distributions Domain Range', fontsize=50, y=1)
     plt.tight_layout()
-    plt.savefig('../output/results_ci_each_domain.pdf', bbox_inches='tight')
+    plt.savefig('../output/sp_stddev_comparison.png', bbox_inches='tight')
     plt.show()
 
 
@@ -85,6 +85,6 @@ confidence_intervals_df = pd.DataFrame({
     'F-Score 95%': [f"{avg:.4f} ({lower:.4f}, {upper:.4f})" for (avg, (lower, upper)) in zip(average_fscore, confidence_intervals)]
 })
 
-
+print(confidence_intervals_df.to_latex())
 
 

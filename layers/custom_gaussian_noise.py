@@ -57,6 +57,7 @@ class CustomGaussianNoise(layers.Layer):
         self.random_generator = tf.random.Generator.from_non_deterministic_state()
         self.supports_masking = True
         self.built = True
+        self.last_stddev = None
 
     def call(self, inputs, training=False):
         if not training:
@@ -66,12 +67,11 @@ class CustomGaussianNoise(layers.Layer):
             self.stddev
             if self.stddev is not None
             else self.random_generator.uniform(
-                shape=[],
-                minval=self.min_stddev,
-                maxval=self.max_stddev,
+                shape=[], minval=self.min_stddev, maxval=self.max_stddev
             )
         )
 
+        self.last_stddev = stddev  # Store the sampled stddev
         noise = backend.random.normal(
             shape=ops.shape(inputs),
             mean=0.0,

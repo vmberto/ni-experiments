@@ -3,10 +3,10 @@ from scipy import stats
 import pandas as pd
 
 
-def bootstrap_confidence_interval(data, num_samples=1000, ci=0.95):
+def bootstrap_confidence_interval(data, num_samples=1000, ci=0.95, metric=np.mean):
     data = np.array(data)
 
-    res = stats.bootstrap((data,), np.mean, confidence_level=ci, n_resamples=num_samples, method='basic')
+    res = stats.bootstrap((data,), metric, confidence_level=ci, n_resamples=num_samples, method='basic')
     return res.confidence_interval.low, res.confidence_interval.high
 
 
@@ -39,7 +39,6 @@ def prepare_df(df, categories_df_path):
     merged_results.drop(columns=['category'], inplace=True)
 
     return merged_results
-
 
 
 markers = ['o', 's', '^', 'v', '<', '>', 'p']
