@@ -5,7 +5,6 @@ import tensorflow_datasets as tfds
 from keras import datasets, models
 from sklearn.model_selection import KFold
 import numpy as np
-from cifar_experiments_config import BATCH_SIZE
 from lib.metrics import calculate_kl_divergence
 
 
@@ -14,7 +13,7 @@ class Cifar10Dataset:
 
     def __init__(self, input_shape=(72, 72, 3)):
         self.input_shape = input_shape
-        self.batch_size = BATCH_SIZE
+        self.batch_size = 128
 
     def _resize_and_rescale(self):
         return models.Sequential([
