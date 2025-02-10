@@ -13,3 +13,4 @@ nlpaug
 scikit-learn
 nltk
 spacy
+classification-models

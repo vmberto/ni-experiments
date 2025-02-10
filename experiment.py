@@ -69,8 +69,7 @@ def evaluate_corruptions(model, dataset, strategy_name, model_name, training_tim
         )
 
 
-def experiment(Dataset, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CORRUPTIONS):
-    dataset = Dataset()
+def experiment(dataset, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CORRUPTIONS):
     experiments_config = filter_active(CONFIGS)
 
     x_train, y_train, x_test, y_test, splits = dataset.get_kfold_splits(KFOLD_N_SPLITS)

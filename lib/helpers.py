@@ -14,8 +14,8 @@ def seaborn_styles(sns):
     sns.set_style("whitegrid")
     sns.set(font='serif')
     sns.set_style("white", {
-      "font.family": "serif",
-      "font.serif": ["Times", "Palatino", "serif"],
+        "font.family": "serif",
+        "font.serif": ["Times", "Palatino", "serif"],
     })
 
 
@@ -41,4 +41,13 @@ def prepare_df(df, categories_df_path):
     return merged_results
 
 
-markers = ['o', 's', '^', 'v', '<', '>', 'p']
+markers = ['o', 's', '^', 'v', '<', '>', 'p', '*',  # Star
+           'D',  # Diamond
+           'd',  # Thin diamond
+           'h',  # Hexagon1
+           'H',  # Hexagon2
+           '+',  # Plus
+           'x',  # x
+           'X',  # Filled X
+           '|',  # Vertical line
+           '_']

@@ -11,9 +11,9 @@ from lib.metrics import calculate_kl_divergence
 class Cifar10Dataset:
     AUTOTUNE = tf.data.AUTOTUNE
 
-    def __init__(self):
-        self.input_shape = (72, 72, 3)
-        self.batch_size = 64
+    def __init__(self, input_shape, batch_size):
+        self.input_shape = input_shape
+        self.batch_size = batch_size
 
     def _resize_and_rescale(self):
         return models.Sequential([

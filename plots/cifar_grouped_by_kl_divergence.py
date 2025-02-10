@@ -7,7 +7,7 @@ seaborn_styles(sns)
 
 # RAW_RESULTS_PATH = '../old/official_10folds_results_resnet50_xception.csv'
 RAW_RESULTS_PATH = '../output/complete_resnet50_resnet18.csv'
-# RAW_RESULTS_PATH = '../output/gauss_dist_vs_fixed.csv'
+# RAW_RESULTS_PATH = '../output/sp_dist_vs_fixed_resnet50.csv'
 CATEGORIES_DF_PATH = '../results/cifar10/cifar_10_c_divergences_categories.csv'
 
 
