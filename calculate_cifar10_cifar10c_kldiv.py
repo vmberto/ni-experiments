@@ -1,12 +1,18 @@
 import tensorflow as tf
 from dataset.cifar10dataset import Cifar10Dataset
+from layers.custom_gaussian_noise import CustomGaussianNoise
 from lib.consts import CIFAR10_CORRUPTIONS
 from lib.gpu import set_memory_growth
 from keras import callbacks
 from models.autoencoder import Autoencoder
 import pandas as pd
 import multiprocessing
-from cifar_experiments_config import KFOLD_N_SPLITS
+from cifar_experiments_config import KFOLD_N_SPLITS, RandAugment, GAUSSIAN_STDDEV
+
+data_augmentation = [
+    RandAugment,
+    CustomGaussianNoise(max_stddev=GAUSSIAN_STDDEV),
+]
 
 
 def main():
@@ -20,7 +26,7 @@ def main():
     results = []
 
     for fold, (train_index, val_index) in splits:
-        train_fold_ds = dataset.get_dataset_for_autoencoder(x_train[train_index])
+        train_fold_ds = dataset.get_dataset_for_autoencoder(x_train[train_index], data_augmentation)
         val_fold_ds = dataset.get_dataset_for_autoencoder(x_train[val_index])
 
         autoencoder = Autoencoder(input_shape)

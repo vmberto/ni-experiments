@@ -22,7 +22,7 @@ overlap_keywords = [
 
 # Load results and characterization files
 # results = pd.read_csv(f'../results/agnews/raw_lstm_all_strategies_result.csv')
-results = pd.read_csv('../output/complete_resnet50_resnet18.csv')
+results = pd.read_csv('../results/cifar10/complete_results_4architectures.csv')
 characterization_df = pd.read_csv('../results/cifar10/cifar_10_c_divergences_categories.csv')
 
 seaborn_styles(sns)

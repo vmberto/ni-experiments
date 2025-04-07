@@ -5,9 +5,7 @@ from lib.helpers import seaborn_styles, prepare_df, bootstrap_confidence_interva
 
 seaborn_styles(sns)
 
-# RAW_RESULTS_PATH = '../old/official_10folds_results_resnet50_xception.csv'
-RAW_RESULTS_PATH = '../output/complete_resnet50_resnet18.csv'
-# RAW_RESULTS_PATH = '../output/sp_dist_vs_fixed_resnet50.csv'
+RAW_RESULTS_PATH = '../results/cifar10/complete_results_4architectures.csv'
 CATEGORIES_DF_PATH = '../results/cifar10/cifar_10_c_divergences_categories.csv'
 
 
@@ -70,11 +68,18 @@ def plot_results(df):
     plt.show()
 
 
+# Load and prepare data
 results = pd.read_csv(RAW_RESULTS_PATH)
 results = prepare_df(results, CATEGORIES_DF_PATH)
-
 plot_results(results)
 
+
+all_severities = results[results['Severity'] != 'In-Distribution'].groupby(['model', 'strategy', 'Severity'])['f1-score(weighted avg)'].mean().reset_index()
+all_severities['Severity'] = 'All Severities'  # Assign a label
+
+results = pd.concat([results, all_severities], ignore_index=True)
+
+# Compute confidence intervals
 grouped = results.groupby(['model', 'strategy', 'Severity'])
 confidence_intervals = grouped['f1-score(weighted avg)'].apply(lambda x: bootstrap_confidence_interval(x.values))
 average_fscore = grouped['f1-score(weighted avg)'].mean()
@@ -87,5 +92,3 @@ confidence_intervals_df = pd.DataFrame({
 })
 
 print(confidence_intervals_df.to_latex())
-
-

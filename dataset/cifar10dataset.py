@@ -84,8 +84,8 @@ class Cifar10Dataset:
         cifar_10_c = tfds.load(f"cifar10_corrupted/{corruption_type}", split="test", as_supervised=True)
         return self.prepare(cifar_10_c)
 
-    def get_dataset_for_autoencoder(self, x_data):
-        return self.prepare(tf.data.Dataset.from_tensor_slices((x_data, x_data)))
+    def get_dataset_for_autoencoder(self, x_data, da=None):
+        return self.prepare(tf.data.Dataset.from_tensor_slices((x_data, x_data)), data_augmentation=da)
 
     def prepare_cifar10_kfold_for_autoencoder(self, n_splits):
         dataset_train = tfds.load('cifar10', split='train', as_supervised=True)
