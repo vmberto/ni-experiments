@@ -1,5 +1,9 @@
 # Noise Injection Experiments (ni-experiments)
 
+<p align="center">
+  <img src="lib/assets/strategy.gif" alt="Strategy GIF" />
+</p>
+
 This repository contains code and experiments related to combined data augmentation techniques using noise injection techniques in deep neural networks models.
 
 ## Overview
