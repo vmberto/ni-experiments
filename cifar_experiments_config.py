@@ -6,6 +6,9 @@ from layers.random_salt_and_pepper import RandomSaltAndPepper
 from layers.custom_gaussian_noise import CustomGaussianNoise
 from keras import layers
 from models.resnet50 import ResNet50Model
+from models.efficientnetb0 import EfficientNetB0Model
+from models.xception import XceptionModel
+from models.resnet18 import ResNet18Model
 
 
 KFOLD_N_SPLITS = 10
@@ -18,8 +21,10 @@ BATCH_SIZE = 64
 dataset = Cifar10Dataset(INPUT_SHAPE, BATCH_SIZE)
 RandAugment = keras_cv.layers.RandAugment(value_range=(0, 1), augmentations_per_image=3, magnitude=0.3, rate=1)
 MODEL_ARCHITECTURES = [
+    ResNet18Model,
     ResNet50Model,
-    # ResNet18Model,
+    EfficientNetB0Model,
+    XceptionModel,
 ]
 
 CONFIGS = [
