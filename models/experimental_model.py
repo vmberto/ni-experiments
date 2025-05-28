@@ -18,14 +18,16 @@ class ExperimentalModel:
 
     def compile(self, optimizer='adam', loss='sparse_categorical_crossentropy', metrics='accuracy'):
         self.model.compile(optimizer=optimizer, loss=loss, metrics=[metrics])
+        self.model.summary()
 
-    def fit(self, train_dataset, val_dataset=None, callbacks=None, epochs=10):
+    def fit(self, train_dataset, val_dataset=None, callbacks=None, epochs=10, **kwargs):
         start_time = time.time()
         history = self.model.fit(
             train_dataset,
             validation_data=val_dataset,
             epochs=epochs,
             callbacks=callbacks,
+            **kwargs
         )
         end_time = time.time()
         training_time = end_time - start_time

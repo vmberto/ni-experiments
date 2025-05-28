@@ -3,29 +3,11 @@ from keras import layers
 
 
 class RandomSaltAndPepper(layers.Layer):
-    """
-    A custom Keras layer that adds salt-and-pepper noise to inputs.
-
-    Args:
-        factor (float, optional): Fixed probability of noise corruption. Should be in the range [0.0, 1.0].
-        min_factor (float, optional): Minimum value for a range of noise probabilities.
-        max_factor (float, optional): Maximum value for a range of noise probabilities.
-        seed (int, optional): Random seed for reproducibility.
-
-    Notes:
-        - If `factor` is defined, `min_factor` and `max_factor` cannot be defined.
-        - If `min_factor` is defined, `max_factor` must also be defined.
-        - If only `max_factor` is defined, `min_factor` defaults to 0.0.
-    """
-
     def __init__(self, factor=None, min_factor=None, max_factor=None, seed=None, **kwargs):
         super(RandomSaltAndPepper, self).__init__(**kwargs)
-
         if factor is not None:
             if min_factor is not None or max_factor is not None:
-                raise ValueError(
-                    "If 'factor' is defined, 'min_factor' and 'max_factor' cannot be defined."
-                )
+                raise ValueError("If 'factor' is defined, 'min_factor' and 'max_factor' cannot be defined.")
             self.factor = factor
             self.min_factor = None
             self.max_factor = None
@@ -38,9 +20,7 @@ class RandomSaltAndPepper(layers.Layer):
                 raise ValueError("'min_factor' must be less than or equal to 'max_factor'.")
             self.factor = None
         else:
-            raise ValueError(
-                "Either 'factor' must be defined, or 'max_factor' (with optional 'min_factor') must be defined."
-            )
+            raise ValueError("Either 'factor' must be defined, or 'max_factor' must be.")
 
         self.seed = seed
         self.random_generator = tf.random.Generator.from_seed(seed) if seed else tf.random.Generator.from_non_deterministic_state()
@@ -48,7 +28,10 @@ class RandomSaltAndPepper(layers.Layer):
     def call(self, inputs, training=None):
         if not training:
             return inputs
+        return self._add_salt_and_pepper(inputs)
 
+    @tf.function
+    def _add_salt_and_pepper(self, inputs):
         factor = (
             self.factor
             if self.factor is not None
@@ -63,18 +46,17 @@ class RandomSaltAndPepper(layers.Layer):
 
         outputs = tf.where(salt_mask, 1.0, inputs)
         outputs = tf.where(pepper_mask, 0.0, outputs)
-
         return outputs
 
     def compute_output_shape(self, input_shape):
         return input_shape
 
     def get_config(self):
-        config = super(RandomSaltAndPepper, self).get_config()
+        config = super().get_config()
         config.update({
             "factor": self.factor,
-            "min_factor": getattr(self, "min_factor", None),
-            "max_factor": getattr(self, "max_factor", None),
+            "min_factor": self.min_factor,
+            "max_factor": self.max_factor,
             "seed": self.seed,
         })
         return config

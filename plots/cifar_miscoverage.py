@@ -7,23 +7,23 @@ from lib.helpers import seaborn_styles, bootstrap_confidence_interval
 # Define the order of strategies
 STRATEGIES_ORDER = {
     'Baseline': 0,
-    'Salt&Pepper': 1,
-    'Gaussian': 2,
-    'RandAugment': 3,
-    'RandAugment+Gaussian': 4,
-    'RandAugment+S&P': 5,
-    'Mixed': 6,
+    'RandAugment': 1,
+    'RandAugment+S&P': 2,
+    'RandAugment+Gaussian': 3,
+    'Curriculum Learning': 4,
+    'Curriculum Learning V2': 5,
 }
 
-overlap_keywords = [
-    "Gaussian Noise", "Shot Noise", "Impulse Noise",
-    "Speckle Noise", "Brightness", "Contrast",
-]
-
 # Load results and characterization files
-# results = pd.read_csv(f'../results/agnews/raw_lstm_all_strategies_result.csv')
-results = pd.read_csv('../results/cifar10/complete_results_4architectures.csv')
+# results = pd.concat([
+#     pd.read_csv('../output/output_resnet20.csv'),
+#     pd.read_csv('../output/output.csv'),
+#     pd.read_csv('../output/output_wrn2810.csv'),
+#     pd.read_csv('../output/output_cct.csv'),
+# ], ignore_index=False)
 characterization_df = pd.read_csv('../results/cifar10/cifar_10_c_divergences_categories.csv')
+
+results = pd.read_csv('../output/output_merged.csv')
 
 seaborn_styles(sns)
 
@@ -70,12 +70,14 @@ for index in range(10):
 
 
 # Function to generate miscoverage data
-def generate_miscoverage(df):
+def generate_miscoverage(df, severity=None):
     global_10fold_df = df.copy()
     each_replication_array = []
     for i, selected_folds in enumerate(replications):
         splitted_dataframe = global_10fold_df[global_10fold_df['fold'].isin(selected_folds)].copy()
         splitted_dataframe['replication'] = i + 1
+        if severity:
+            splitted_dataframe['Severity'] = severity
         each_replication_array.append(splitted_dataframe)
 
     each_replication_df = pd.concat(each_replication_array, ignore_index=True)
@@ -114,67 +116,67 @@ def generate_miscoverage(df):
 # Generate miscoverage data for in-distribution and out-of-distribution
 result_dataframe_in, each_dataframe_fscore_in = generate_miscoverage(results_in)
 result_dataframe_in['severity'] = 'In-Distribution'
+
 result_dataframe_ood, each_dataframe_fscore_ood = generate_miscoverage(results_ood)
+
+_, each_dataframe_fscore_all_corruptions = generate_miscoverage(results_ood, severity='All Corruptions')
+
+result_dataframe_ood_wo_noise, each_dataframe_fscore_ood_wo_noise = generate_miscoverage(results_ood[
+    ~results_ood['evaluation_set'].str.contains('gaussian|impulse|speckle|shot', case=False, regex=True)
+].copy(), severity='All Corruptions w/o Noise')
+
+
 
 
 # Function to dynamically plot results for all models
-def plot_results_all_dynamic(df_in, df_out, x_label='Mean Centered F-Score', figsize=(50, 25)):
-    models = sorted(df_in['model'].unique())  # Dynamically detect models
+def plot_results_all_dynamic(df_in, df_out, df_out_wo_noise, x_label='Mean Centered F-Score', figsize=(50, 25)):
+    models = sorted(df_in['model'].unique())
     num_models = len(models)
-    num_plot_types = 6  # In-Distribution, All Corruptions, etc.
+
+    severity_labels = [
+        "In-Distribution",
+        "All Corruptions",
+        "All Corruptions w/o Noise",
+        "Lowest",
+        "Mid-Range",
+        "Highest",
+    ]
+    num_plot_types = len(severity_labels)
 
     fig, axes = plt.subplots(
         num_models, num_plot_types, figsize=(figsize[0], figsize[1] * num_models / 3),
-        squeeze=False  # Keep 2D structure even with one row
+        squeeze=False
     )
 
     x_min, x_max = -0.03, 0.03
     x_ticks = [x_min, 0, x_max]
 
-    # Define color palette for strategies
-    unique_approaches = df_in['strategy'].unique()
-    palette_dict = {}
-    for strategy in unique_approaches:
-        if strategy not in palette_dict:
-            if strategy.split('_')[0] == 'Baseline':
-                palette_dict['Baseline'] = '#5471ab'
-            elif strategy.split('_')[0] == 'Gaussian':
-                palette_dict['Gaussian'] = '#6aa66e'
-            elif strategy.split('_')[0] == 'Salt&Pepper':
-                palette_dict['Salt&Pepper'] = '#d1885c'
-            elif strategy.split('_')[0] == 'RandAugment+S&P':
-                palette_dict['RandAugment+S&P'] = '#7f73af'
-            elif strategy.split('_')[0] == 'RandAugment+Gaussian':
-                palette_dict['RandAugment+Gaussian'] = '#8f7963'
-            elif strategy.split('_')[0] == 'RandAugment':
-                palette_dict['RandAugment'] = '#b65655'
-            elif strategy.split('_')[0] == 'Mixed':
-                palette_dict['Mixed'] = '#D48AC7'
-    palette = [palette_dict[strategy.split('_')[0]] for strategy in unique_approaches]
+    all_strategies = sorted(df_in['strategy'].str.extract(r'^([^_]+)')[0].unique())
+    palette = sns.color_palette("husl", len(all_strategies))
+    palette_dict = {strategy: color for strategy, color in zip(all_strategies, palette)}
 
     for row_idx, model in enumerate(models):
         model_results_in = df_in[df_in['model'] == model]
         model_results_out = df_out[df_out['model'] == model]
+        model_results_out_wo_noise = df_out_wo_noise[df_out_wo_noise['model'] == model]
 
         all_corruptions = model_results_out.copy()
         all_corruptions['severity'] = "All Corruptions"
 
-        no_overlap = model_results_out[
-            ~model_results_out['evaluation_set'].str.contains('|'.join(overlap_keywords), case=False, na=False)
-        ].copy()
-        no_overlap['severity'] = "All Corruptions"
+        without_noise = model_results_out_wo_noise.copy()
+        without_noise['severity'] = "All Corruptions w/o Noise"
 
-        severities = {
+        severity_data = {
             "In-Distribution": model_results_in,
             "All Corruptions": all_corruptions,
-            "w/o Overlap": no_overlap,
+            "All Corruptions w/o Noise": without_noise,
             "Lowest": model_results_out[model_results_out['severity'] == 'Lowest'],
             "Mid-Range": model_results_out[model_results_out['severity'] == 'Mid-Range'],
             "Highest": model_results_out[model_results_out['severity'] == 'Highest'],
         }
 
-        # Plot each type of result for the current model
-        for col_idx, (severity_label, severity_df) in enumerate(severities.items()):
+        for col_idx, severity_label in enumerate(severity_labels):
+            severity_df = severity_data.get(severity_label, pd.DataFrame())
             ax = axes[row_idx, col_idx]
 
             sns.pointplot(
@@ -185,7 +187,7 @@ def plot_results_all_dynamic(df_in, df_out, x_label='Mean Centered F-Score', fig
                 linestyles='none',
                 dodge=.9,
                 errorbar=("ci", 95),
-                palette=palette,
+                palette=[palette_dict[strategy.split('_')[0]] for strategy in severity_df['strategy'].unique()],
                 err_kws={'linewidth': 3},
                 ax=ax
             )
@@ -194,32 +196,22 @@ def plot_results_all_dynamic(df_in, df_out, x_label='Mean Centered F-Score', fig
             ax.set_xticks(x_ticks)
             ax.set_xticklabels(x_ticks, fontsize=28)
             ax.set_yticks([])
+            ax.set_xlabel([])
             ax.axvline(x=0, color='k', linestyle='--')
 
-            # Add title only for the first row
             if row_idx == 0:
                 ax.set_title(severity_label, fontsize=42)
-            else:
-                ax.set_title("")
-
             if row_idx == num_models - 1:
                 ax.set_xlabel(x_label, fontsize=42)
-            else:
-                ax.set_xlabel("")
-
-            # Add y-label only for the first column of plots
             if col_idx == 0:
                 ax.set_ylabel(model, fontsize=42)
-            else:
-                ax.set_ylabel("")
 
             ax.get_legend().remove()
 
-    # Generate a single legend for all subplots
     handles, labels = axes[0, 0].get_legend_handles_labels()
     labels = [label.split('_')[0] for label in labels]
-    unique_labels = []
-    unique_handles = []
+    unique_labels, unique_handles = [], []
+
     for h, l in zip(handles, labels):
         if l not in unique_labels:
             unique_labels.append(l)
@@ -240,21 +232,56 @@ def plot_results_all_dynamic(df_in, df_out, x_label='Mean Centered F-Score', fig
     )
 
     plt.tight_layout()
-    plt.savefig('../output/dynamic_miscoverage_plot.pdf', bbox_inches='tight')
+    plt.savefig('../output/dynamic_miscoverage_plot_dynamic_palette.png', bbox_inches='tight')
     plt.show()
 
 
-plot_results_all_dynamic(result_dataframe_in, result_dataframe_ood)
+plot_results_all_dynamic(result_dataframe_in, result_dataframe_ood, result_dataframe_ood_wo_noise)
 
-df = pd.concat(each_dataframe_fscore_in + each_dataframe_fscore_ood)
+df = pd.concat(each_dataframe_fscore_in + each_dataframe_fscore_ood + each_dataframe_fscore_ood_wo_noise + each_dataframe_fscore_all_corruptions)
+
+results_list = []
 
 for model in df['model'].unique():
-    print('\n')
-    for strategy in STRATEGIES_ORDER.keys():
+    for strategy in STRATEGIES_ORDER.keys():  # Use STRATEGIES_ORDER to maintain desired sort
         curr_df = df[(df['model'] == model) & (df['strategy'].str.startswith(strategy))]
 
-        for severity, severity_df in curr_df.groupby('severity'):
-            lower, upper = bootstrap_confidence_interval(severity_df['f1-score(weighted avg)'], metric=np.std)
-            print(
-                f"STD {model} - {strategy} - Severity {severity}: {severity_df['f1-score(weighted avg)'].std()} ({lower}, {upper})"
-            )
+        if not curr_df.empty:  # Only process if there's data for this strategy
+            for severity, severity_df in curr_df.groupby('severity'):
+                # Calculate mean and standard deviation for the metric
+                std_fscore = severity_df['f1-score(weighted avg)'].std()
+
+                # Bootstrap confidence interval for the standard deviation
+                # Make sure there's enough data for bootstrap, otherwise it might fail
+                if len(severity_df['f1-score(weighted avg)']) > 1:
+                    lower_std, upper_std = bootstrap_confidence_interval(severity_df['f1-score(weighted avg)'],
+                                                                         metric=np.std)
+                else:  # Cannot compute std or CI with only one data point
+                    lower_std, upper_std = np.nan, np.nan
+
+                results_list.append({
+                    'Model': model,
+                    'Strategy': strategy,
+                    'Severity': severity,
+                    'STD F1-Score': std_fscore,
+                    'STD Lower CI': lower_std,
+                    'STD Upper CI': upper_std
+                })
+
+# Convert the list of results to a DataFrame
+results_df = pd.DataFrame(results_list)
+
+# Format the 'STD (Lower, Upper)' column for display
+results_df['STD (Lower, Upper)'] = results_df.apply(
+    lambda row: f"{row['STD F1-Score']:.4f} ({row['STD Lower CI']:.4f}, {row['STD Upper CI']:.4f})"
+    if not pd.isna(row['STD F1-Score']) else 'N/A', axis=1
+)
+
+# Select and reorder columns for the final display
+final_df = results_df[['Model', 'Strategy', 'Severity', 'STD (Lower, Upper)']]
+
+# Sort the DataFrame for better readability, if desired
+final_df = final_df.sort_values(by=['Model', 'Strategy', 'Severity'])
+
+# Print the markdown table
+print(final_df.to_string(index=False))

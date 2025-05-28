@@ -1,6 +1,6 @@
 import tensorflow as tf
 import keras_cv
-from models.resnet50 import ResNet50Model
+from models.wideresnet2810 import WideResNet28_10Model
 from keras import layers, datasets, applications, callbacks
 import numpy as np
 from layers.random_salt_and_pepper import RandomSaltAndPepper
@@ -31,7 +31,7 @@ def load_cifar10():
 ##############################################################################
 # 2. Build a ResNet50 model from scratch for 32×32 input
 ##############################################################################
-def build_resnet50_cifar(input_shape=(72, 72, 3), num_classes=10):
+def build_wrn2810_cifar(input_shape=(72, 72, 3), num_classes=10):
     """
     Creates a ResNet50 with random initialization (weights=None),
     for a 32×32 input and 10 classes (CIFAR-10).
@@ -91,7 +91,7 @@ def train_and_evaluate(
     random_salt_pepper = RandomSaltAndPepper(max_factor=randaug_params['s&p_factor'])
 
     # 2) Build the ResNet50 model (no pretrained weights)
-    model = build_resnet50_cifar()
+    model = build_wrn2810_cifar()
 
     # 3) Prepare dataset: apply augmentation to the training set only
     train_ds = prepare_dataset(
