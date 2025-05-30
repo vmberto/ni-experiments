@@ -5,8 +5,10 @@ import keras_cv
 from layers.random_salt_and_pepper import RandomSaltAndPepper
 from layers.custom_gaussian_noise import CustomGaussianNoise
 from keras import layers
+
+from models.resnet20_regularized import ResNet20RegularizedModel
 from models.wideresnet2810 import WideResNet28_10Model
-from models.cct import CCTCIFAR10Model
+from models.cct import CCTModel
 from models.resnet20 import ResNet20Model
 
 
@@ -16,13 +18,15 @@ GAUSSIAN_STDDEV = .2
 
 INPUT_SHAPE = (32, 32, 3)
 BATCH_SIZE = 128
+EPOCHS = 200
+DATASET = Cifar10Dataset(INPUT_SHAPE, BATCH_SIZE)
 
-dataset = Cifar10Dataset(INPUT_SHAPE, BATCH_SIZE)
 RandAugment = keras_cv.layers.RandAugment(value_range=(0, 1), augmentations_per_image=3, magnitude=0.3, rate=1)
 MODEL_ARCHITECTURES = [
-    CCTCIFAR10Model,
+    # ResNet20Model,
+    ResNet20RegularizedModel,
     # WideResNet28_10Model,
-    # WideResNet28_10Model
+    # CCTModel,
 ]
 
 CONFIGS = [
@@ -45,7 +49,7 @@ CONFIGS = [
             RandomSaltAndPepper(max_factor=SALT_PEPPER_FACTOR),
         ],
         "curriculum_learning": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'RandAugment+Gaussian',
@@ -54,7 +58,7 @@ CONFIGS = [
             CustomGaussianNoise(max_stddev=GAUSSIAN_STDDEV),
         ],
         "curriculum_learning": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'Curriculum Learning',
@@ -71,7 +75,7 @@ CONFIGS = [
         ],
         "es_patience_stages": [3, 5, 8],
         "curriculum_learning": True,
-        "active": False,
+        "active": True,
     },
 
     # Fixed
@@ -97,4 +101,4 @@ CONFIGS = [
 
 
 if __name__ == '__main__':
-    experiment(dataset, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CIFAR10_CORRUPTIONS)
+    experiment(DATASET, EPOCHS, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CIFAR10_CORRUPTIONS)

@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+mimii_dataset
+
 # C extensions
 *.so
 

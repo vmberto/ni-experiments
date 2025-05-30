@@ -1,6 +1,6 @@
 from datetime import datetime
 import pandas as pd
-from lib.functions import clean_string
+from lib.helpers import clean_string
 from scipy.stats import entropy
 import os
 
@@ -53,6 +53,28 @@ def write_fscore_result(
 
     df = pd.concat([df, pd.DataFrame([new_line])], ignore_index=True)
 
+    df.to_csv(csv_file, index=False)
+
+
+def write_auc_results(strategy_name, model_name, fold_number, auc_value, evaluation_set='In-Distribution'):
+    csv_file = f'{os.getcwd()}/output/output_mimii.csv'
+
+    new_line = {
+        'strategy': strategy_name,
+        'model': model_name,
+        'evaluation_set': evaluation_set,
+        'fold': fold_number,
+        'auc_roc': auc_value,
+    }
+
+    try:
+        df = pd.read_csv(csv_file)
+    except FileNotFoundError:
+        df = pd.DataFrame(
+            columns=['strategy', 'model', 'evaluation_set', 'fold', 'auc_roc']
+        )
+
+    df = pd.concat([df, pd.DataFrame([new_line])], ignore_index=True)
     df.to_csv(csv_file, index=False)
 
 

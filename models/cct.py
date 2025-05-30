@@ -29,7 +29,7 @@ def mlp(x, hidden_units):
     return x
 
 
-class CCTCIFAR10Model(ExperimentalModel):
+class CCTModel(ExperimentalModel):
     def __init__(self, input_shape=(32, 32, 3), num_classes=10, strategy_name=''):
         super().__init__(input_shape, num_classes, strategy_name)
         self.name = 'CCT'

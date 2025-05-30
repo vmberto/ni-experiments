@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import stats
 import pandas as pd
+import re
 
 
 def bootstrap_confidence_interval(data, num_samples=1000, ci=0.95, metric=np.mean):
@@ -51,3 +52,14 @@ markers = ['o', 's', '^', 'v', '<', '>', 'p', '*',  # Star
            'X',  # Filled X
            '|',  # Vertical line
            '_']
+
+
+def clean_string(s):
+    clean_str = re.sub(r'_', ' ', s)
+    clean_str = re.sub(r'_[\d]+', '', clean_str)
+    clean_str = clean_str.title()
+    return clean_str
+
+
+def filter_active(configurations):
+    return [config for config in configurations if config.get("active", False)]

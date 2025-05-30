@@ -1,9 +1,17 @@
 import pandas as pd
 import numpy as np
+from lib.helpers import bootstrap_confidence_interval
 import re
 
-# Carrega os dados
-df = pd.read_csv('../output/output_merged.csv')
+# estimator = 'f1-score(weighted avg)'
+estimator = 'auc_roc'
+
+# df = pd.concat([
+#     pd.read_csv('../output/output.csv'),
+#     pd.read_csv('../output/output_merged.csv')
+# ], ignore_index=False)
+df = pd.read_csv('../output/output_mimii.csv')
+# df = pd.read_csv('../output/output.csv')
 
 # Extrai raiz da corrupção
 def get_base_corruption(name):
@@ -13,6 +21,7 @@ df['corruption_group'] = df['evaluation_set'].apply(get_base_corruption)
 
 # Define corrupções do tipo ruído
 noise_like = {"Gaussian Noise", "Shot Noise", "Speckle Noise", "Impulse Noise"}
+# noise_like = {"Gaussian Noise", "Shot Noise", "Speckle Noise", "Impulse Noise", "Contrast"}
 
 # Função de bootstrap com formatação
 def format_no_leading_zero(x):
@@ -30,7 +39,7 @@ def bootstrap_ci_format(series, n_bootstrap=1000, ci=95):
 
 # Resumo com média
 def summarize_with_ci(df_subset, column_name):
-    grouped = df_subset.groupby(['model', 'strategy'])['f1-score(weighted avg)']
+    grouped = df_subset.groupby(['model', 'strategy'])[estimator]
     rows = []
     for (model, strategy), series in grouped:
         formatted, mean_val = bootstrap_ci_format(series)
@@ -63,3 +72,4 @@ summary_df = summary_df.drop(columns=[c for c in summary_df.columns if c.endswit
 
 # Mostra resultado final
 print(summary_df.to_string(index=False))
+

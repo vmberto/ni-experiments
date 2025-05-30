@@ -96,4 +96,10 @@ CIFAR10_CORRUPTIONS = [
     'zoom_blur_5',
 ]
 
+MIMII_OOD_MACHINES = [
+    'id_02',
+    'id_04',
+    'id_06',
+]
+
 IN_DISTRIBUTION_LABEL = 'in-distribution'

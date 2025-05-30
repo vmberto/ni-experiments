@@ -15,15 +15,13 @@ STRATEGIES_ORDER = {
 }
 
 # Load results and characterization files
-# results = pd.concat([
-#     pd.read_csv('../output/output_resnet20.csv'),
-#     pd.read_csv('../output/output.csv'),
-#     pd.read_csv('../output/output_wrn2810.csv'),
-#     pd.read_csv('../output/output_cct.csv'),
-# ], ignore_index=False)
+results = pd.concat([
+    pd.read_csv('../output/output_merged.csv'),
+    pd.read_csv('../output/output.csv'),
+], ignore_index=False)
 characterization_df = pd.read_csv('../results/cifar10/cifar_10_c_divergences_categories.csv')
 
-results = pd.read_csv('../output/output_merged.csv')
+# results = pd.read_csv('../output/output_merged.csv')
 
 seaborn_styles(sns)
 
@@ -196,7 +194,7 @@ def plot_results_all_dynamic(df_in, df_out, df_out_wo_noise, x_label='Mean Cente
             ax.set_xticks(x_ticks)
             ax.set_xticklabels(x_ticks, fontsize=28)
             ax.set_yticks([])
-            ax.set_xlabel([])
+            ax.set_xlabel('')
             ax.axvline(x=0, color='k', linestyle='--')
 
             if row_idx == 0:
