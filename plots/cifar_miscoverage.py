@@ -3,6 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 from lib.helpers import seaborn_styles, bootstrap_confidence_interval
+seaborn_styles(sns)
 
 # Define the order of strategies
 STRATEGIES_ORDER = {
@@ -14,22 +15,15 @@ STRATEGIES_ORDER = {
     'Curriculum Learning V2': 5,
 }
 
-# Load results and characterization files
 results = pd.concat([
-    pd.read_csv('../output/output_merged.csv'),
-    pd.read_csv('../output/output.csv'),
+    pd.read_csv('../results/new-cifar10/output_merged.csv'),
+    pd.read_csv('../output/output_resnet20_regularized.csv'),
 ], ignore_index=False)
 characterization_df = pd.read_csv('../results/cifar10/cifar_10_c_divergences_categories.csv')
 
-# results = pd.read_csv('../output/output_merged.csv')
-
-seaborn_styles(sns)
-
-# Preprocess evaluation sets in results
 results['evaluation_set'] = results['evaluation_set'].str.replace(' ', '_').str.lower()
 results['evaluation_set'] = results['evaluation_set'].str.replace('-', '_').str.lower()
 
-# Preprocess corruption types in characterization_df
 characterization_df['corruption_type'] = characterization_df['corruption_type'].str.replace(' ', '_').str.lower()
 
 # Merge results with characterization data
@@ -120,7 +114,7 @@ result_dataframe_ood, each_dataframe_fscore_ood = generate_miscoverage(results_o
 _, each_dataframe_fscore_all_corruptions = generate_miscoverage(results_ood, severity='All Corruptions')
 
 result_dataframe_ood_wo_noise, each_dataframe_fscore_ood_wo_noise = generate_miscoverage(results_ood[
-    ~results_ood['evaluation_set'].str.contains('gaussian|impulse|speckle|shot', case=False, regex=True)
+    ~results_ood['evaluation_set'].str.contains('gaussian|impulse|speckle|shot|contrast|brightness', case=False, regex=True)
 ].copy(), severity='All Corruptions w/o Noise')
 
 

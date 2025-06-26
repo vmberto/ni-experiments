@@ -3,6 +3,20 @@ import pandas as pd
 from lib.helpers import clean_string
 from scipy.stats import entropy
 import os
+import shutil
+
+
+def create_experiment_folder(experiment_dir, config_path: str) -> str:
+    os.makedirs(experiment_dir, exist_ok=True)
+
+    config_dst = os.path.join(experiment_dir, 'config')
+    try:
+        shutil.copyfile(config_path, config_dst)
+    except FileNotFoundError:
+        print(f"Warning: config file '{config_path}' not found. Skipping copy.")
+
+    return experiment_dir
+
 
 def convert_dict(data_dict):
     converted_dict = {}
@@ -22,11 +36,13 @@ def convert_dict(data_dict):
 
 
 def write_fscore_result(
-        evauation_set, strategy_name, model_name,
-        training_time, fold_number, loss, acc,
-        report, epochs_run
+    evauation_set, strategy_name, model_name,
+    training_time, fold_number, loss, acc,
+    report, epochs_run,
+    config_path='./cifar_experiments_config.py'
 ):
-    csv_file = f'{os.getcwd()}/output/output.csv'
+    experiment_dir = create_experiment_folder(config_path)
+    csv_file = os.path.join(experiment_dir, 'output.csv')
 
     dict_report = convert_dict(report)
 
@@ -48,18 +64,25 @@ def write_fscore_result(
     except FileNotFoundError:
         df = pd.DataFrame(
             columns=[
-                'strategy', 'model', 'evaluation_set', 'date_finished', 'training_time', 'fold', 'accuracy', 'loss',
-            ])
+                'strategy', 'model', 'evaluation_set', 'date_finished',
+                'training_time', 'fold', 'accuracy', 'loss', 'epochs_run',
+                *dict_report.keys()
+            ]
+        )
 
     df = pd.concat([df, pd.DataFrame([new_line])], ignore_index=True)
-
     df.to_csv(csv_file, index=False)
 
+    return experiment_dir
 
-def write_auc_results(strategy_name, model_name, fold_number, auc_value, evaluation_set='In-Distribution'):
-    csv_file = f'{os.getcwd()}/output/output_mimii.csv'
+
+def write_auc_results(experiment_dir, machine, strategy_name, model_name, fold_number, auc_value, evaluation_set='In-Distribution'):
+    config_path = './mimii_experiments_config.py'
+    create_experiment_folder(experiment_dir, config_path)
+    csv_file = os.path.join(experiment_dir, 'output.csv')
 
     new_line = {
+        'machine': machine,
         'strategy': strategy_name,
         'model': model_name,
         'evaluation_set': evaluation_set,
@@ -76,6 +99,8 @@ def write_auc_results(strategy_name, model_name, fold_number, auc_value, evaluat
 
     df = pd.concat([df, pd.DataFrame([new_line])], ignore_index=True)
     df.to_csv(csv_file, index=False)
+
+    return experiment_dir
 
 
 def calculate_kl_divergence(latent_clean, latent_corrupted):

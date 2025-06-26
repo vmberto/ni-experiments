@@ -1,5 +1,5 @@
 from dataset.cifar10dataset import Cifar10Dataset
-from experiment import experiment
+from cifar_experiment import experiment
 from lib.consts import CIFAR10_CORRUPTIONS
 import keras_cv
 from layers.random_salt_and_pepper import RandomSaltAndPepper

@@ -3,15 +3,9 @@ import numpy as np
 from lib.helpers import bootstrap_confidence_interval
 import re
 
-# estimator = 'f1-score(weighted avg)'
-estimator = 'auc_roc'
+estimator = 'f1-score(weighted avg)'
 
-# df = pd.concat([
-#     pd.read_csv('../output/output.csv'),
-#     pd.read_csv('../output/output_merged.csv')
-# ], ignore_index=False)
-df = pd.read_csv('../output/output_mimii.csv')
-# df = pd.read_csv('../output/output.csv')
+df = pd.read_csv('../results/new-cifar10/output_merged.csv')
 
 # Extrai raiz da corrupção
 def get_base_corruption(name):
@@ -20,8 +14,9 @@ def get_base_corruption(name):
 df['corruption_group'] = df['evaluation_set'].apply(get_base_corruption)
 
 # Define corrupções do tipo ruído
-noise_like = {"Gaussian Noise", "Shot Noise", "Speckle Noise", "Impulse Noise"}
+# noise_like = {"Gaussian Noise", "Shot Noise", "Speckle Noise", "Impulse Noise"}
 # noise_like = {"Gaussian Noise", "Shot Noise", "Speckle Noise", "Impulse Noise", "Contrast"}
+noise_like = {"Gaussian Noise", "Shot Noise", "Speckle Noise", "Impulse Noise", "Contrast", "Brightness"}
 
 # Função de bootstrap com formatação
 def format_no_leading_zero(x):

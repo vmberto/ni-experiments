@@ -1,65 +1,63 @@
+from audiomentations import AddGaussianNoise
+
 from dataset.mimiidataset import MIMIIDataset
+from layers.audio_randaugment import AudioRandAugment
 from lib.consts import MIMII_OOD_MACHINES
 from mtsa import Hitachi
 from mimii_experiment import experiment
-from audiomentations import Compose, AddGaussianNoise, HighPassFilter, LowPassFilter, TimeMask
 
+
+MIMII_MACHINES = [
+    'valve',
+    'pump',
+    'slider',
+    'fan',
+]
 
 KFOLD_N_SPLITS = 10
-SALT_PEPPER_FACTOR = .3
-GAUSSIAN_STDDEV = .2
-
-BATCH_SIZE = 128
-EPOCHS = 50
+BATCH_SIZE = 512
+EPOCHS = 600
 
 DATASET = MIMIIDataset(BATCH_SIZE)
 MODEL_ARCHITECTURES = [
     Hitachi,
 ]
 
-RandAugment = Compose([
-    HighPassFilter(min_cutoff_freq=100, max_cutoff_freq=300, p=0.2),
-    LowPassFilter(min_cutoff_freq=4000, max_cutoff_freq=7000, p=0.2),
-    TimeMask(min_band_part=0.01, max_band_part=0.05, fade=True, p=0.3),
-])
+RandAugment = AudioRandAugment(n_ops=2, magnitude_range=(0.35, 0.85))
+RandAugmentAndGaussianNoise = AudioRandAugment(n_ops=2, magnitude_range=(0.35, 0.85), include_gaussian_noise=True)
+
+
 
 CONFIGS = [
     {
         "strategy_name": 'Baseline',
         "data_augmentation_layers": None,
         "curriculum_learning": False,
-        "active": True,
+        "active": False,
     },
     {
         "strategy_name": 'RandAugment',
-        "data_augmentation_layers": RandAugment,
-        "curriculum_learning": False,
-        "active": True,
-    },
-    {
-        "strategy_name": 'RandAugment+S&P',
-        "data_augmentation_layers": [
-        ],
+        "data_augmentation_layers": [RandAugment],
         "curriculum_learning": False,
         "active": False,
     },
     {
         "strategy_name": 'RandAugment+Gaussian',
-        "data_augmentation_layers": [
-        ],
+        "data_augmentation_layers": [RandAugmentAndGaussianNoise],
         "curriculum_learning": False,
-        "active": False,
+        "active": True,
     },
-    {
-        "strategy_name": 'Curriculum Learning',
-        "data_augmentation_layers": [
-        ],
-        "es_patience_stages": [3, 5, 8],
-        "curriculum_learning": True,
-        "active": False,
-    },
+    # {
+    #     "strategy_name": 'Curriculum Learning',
+    #     "data_augmentation_layers": [
+    #         RandAugment, [RandAugment, PartialGaussianNoise], [RandAugment, GaussianNoise]
+    #     ],
+    #     "es_patience_stages": [10, 10, 10],
+    #     "curriculum_learning": True,
+    #     "active": False,
+    # },
 ]
 
 
 if __name__ == '__main__':
-    experiment(DATASET, EPOCHS, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, MIMII_OOD_MACHINES)
+    experiment(DATASET, EPOCHS, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, MIMII_MACHINES, MIMII_OOD_MACHINES)

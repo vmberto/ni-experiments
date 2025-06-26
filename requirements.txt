@@ -20,4 +20,5 @@ torch~=2.5.1
 soundfile~=0.13.1
 pillow~=11.1.0
 requests~=2.32.3
-audiomentations~=0.32.0
+audiomentations~=0.41.0
+optuna

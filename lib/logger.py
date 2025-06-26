@@ -10,7 +10,7 @@ def print_execution(fold_number, strategy_name, name):
 
 def print_training_stage(stage_index, aug_layers):
     print("\033[93m{}\033[00m"
-          .format(f"\n--- Stage {stage_index + 1}: Using augmentations: {[str(l) for l in aug_layers]} ---"))
+          .format(f"\n--- Stage {str(stage_index + 1)}: Using augmentations: {str(aug_layers)} ---"))
 
 
 def print_evaluation(fold_number, strategy_name, name, data):
