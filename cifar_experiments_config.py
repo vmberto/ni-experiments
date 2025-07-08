@@ -1,12 +1,10 @@
 from dataset.cifar10dataset import Cifar10Dataset
-from cifar_experiment import experiment
+from scripts.experiment_pipeline import experiment
 from lib.consts import CIFAR10_CORRUPTIONS
 import keras_cv
 from layers.random_salt_and_pepper import RandomSaltAndPepper
 from layers.custom_gaussian_noise import CustomGaussianNoise
-from keras import layers
 
-from models.resnet20_regularized import ResNet20RegularizedModel
 from models.wideresnet2810 import WideResNet28_10Model
 from models.cct import CCTModel
 from models.resnet20 import ResNet20Model
@@ -23,10 +21,9 @@ DATASET = Cifar10Dataset(INPUT_SHAPE, BATCH_SIZE)
 
 RandAugment = keras_cv.layers.RandAugment(value_range=(0, 1), augmentations_per_image=3, magnitude=0.3, rate=1)
 MODEL_ARCHITECTURES = [
-    # ResNet20Model,
-    ResNet20RegularizedModel,
-    # WideResNet28_10Model,
-    # CCTModel,
+    ResNet20Model,
+    WideResNet28_10Model,
+    CCTModel,
 ]
 
 CONFIGS = [
@@ -40,7 +37,7 @@ CONFIGS = [
         "strategy_name": 'RandAugment',
         "data_augmentation_layers": [RandAugment],
         "curriculum_learning": False,
-        "active": True,
+        "active": False,
     },
     {
         "strategy_name": 'RandAugment+S&P',
@@ -49,7 +46,7 @@ CONFIGS = [
             RandomSaltAndPepper(max_factor=SALT_PEPPER_FACTOR),
         ],
         "curriculum_learning": False,
-        "active": True,
+        "active": False,
     },
     {
         "strategy_name": 'RandAugment+Gaussian',
@@ -58,7 +55,7 @@ CONFIGS = [
             CustomGaussianNoise(max_stddev=GAUSSIAN_STDDEV),
         ],
         "curriculum_learning": False,
-        "active": True,
+        "active": False,
     },
     {
         "strategy_name": 'Curriculum Learning',
@@ -75,26 +72,6 @@ CONFIGS = [
         ],
         "es_patience_stages": [3, 5, 8],
         "curriculum_learning": True,
-        "active": True,
-    },
-
-    # Fixed
-    {
-        "strategy_name": 'RandAugment+Gaussian/Fixed.2',
-        "data_augmentation_layers": [
-            RandAugment,
-            layers.GaussianNoise(.2),
-        ],
-        "curriculum_learning": False,
-        "active": False,
-    },
-{
-        "strategy_name": 'RandAugment+S&P/Fixed.3',
-        "data_augmentation_layers": [
-            RandAugment,
-            RandomSaltAndPepper(factor=.3)
-        ],
-        "curriculum_learning": False,
         "active": False,
     },
 ]

@@ -76,7 +76,7 @@ class MIMIIDataset:
     def get(self, x_paths, y_labels, shuffle=False, augmentation_layer=None):
         return self.prepare(x_paths, y_labels, shuffle=shuffle, augmentation_layer=augmentation_layer)
 
-    def get_ood_dataset(self, machine, type):
+    def get_corrupted(self, machine, type):
         _, x_test, _, y_test = files_train_test_split(
             f'{os.getcwd()}/dataset/mimii_dataset/{machine}/{type}'
         )

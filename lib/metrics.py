@@ -36,20 +36,26 @@ def convert_dict(data_dict):
 
 
 def write_fscore_result(
-    evauation_set, strategy_name, model_name,
+    evaluation_set, strategy_name, model_name,
     training_time, fold_number, loss, acc,
-    report, epochs_run,
+    report, epochs_run, experiment_dir,
     config_path='./cifar_experiments_config.py'
 ):
-    experiment_dir = create_experiment_folder(config_path)
+    experiment_dir = create_experiment_folder(experiment_dir, config_path)
     csv_file = os.path.join(experiment_dir, 'output.csv')
 
-    dict_report = convert_dict(report)
+    base_fields = {
+        'strategy', 'model', 'evaluation_set', 'date_finished',
+        'training_time', 'fold', 'accuracy', 'loss', 'epochs_run'
+    }
+
+    dict_report_raw = convert_dict(report)
+    dict_report = {k: v for k, v in dict_report_raw.items() if k not in base_fields}
 
     new_line = {
         'strategy': strategy_name,
         'model': model_name,
-        'evaluation_set': clean_string(evauation_set),
+        'evaluation_set': clean_string(evaluation_set),
         'date_finished': datetime.now(),
         'training_time': training_time,
         'fold': fold_number,
@@ -61,14 +67,16 @@ def write_fscore_result(
 
     try:
         df = pd.read_csv(csv_file)
+        # Ensure no duplicate columns
+        df = df.loc[:, ~df.columns.duplicated()]
     except FileNotFoundError:
-        df = pd.DataFrame(
-            columns=[
-                'strategy', 'model', 'evaluation_set', 'date_finished',
-                'training_time', 'fold', 'accuracy', 'loss', 'epochs_run',
-                *dict_report.keys()
-            ]
-        )
+        # Use all current keys as initial columns
+        df = pd.DataFrame(columns=list(new_line.keys()))
+
+    # Also make sure the new_line matches df columns exactly
+    for col in df.columns:
+        if col not in new_line:
+            new_line[col] = None  # fill missing keys
 
     df = pd.concat([df, pd.DataFrame([new_line])], ignore_index=True)
     df.to_csv(csv_file, index=False)

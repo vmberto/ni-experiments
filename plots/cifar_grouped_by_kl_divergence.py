@@ -5,7 +5,7 @@ import numpy as np
 from lib.helpers import seaborn_styles, prepare_df, bootstrap_confidence_interval, markers
 
 # Paths
-RAW_RESULTS_PATH = '../results/new-cifar10/resnet20_wrn2810_cct.csv'
+RAW_RESULTS_PATH = '../results/cifar10/resnet20_wrn2810_cct.csv'
 CATEGORIES_DF_PATH = '../results/cifar10/cifar_10_c_divergences_categories.csv'
 
 # Constants

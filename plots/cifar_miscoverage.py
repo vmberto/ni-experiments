@@ -16,8 +16,7 @@ STRATEGIES_ORDER = {
 }
 
 results = pd.concat([
-    pd.read_csv('../results/new-cifar10/output_merged.csv'),
-    pd.read_csv('../output/output_resnet20_regularized.csv'),
+    pd.read_csv('../results/cifar10/resnet20_wrn2810_cct.csv'),
 ], ignore_index=False)
 characterization_df = pd.read_csv('../results/cifar10/cifar_10_c_divergences_categories.csv')
 

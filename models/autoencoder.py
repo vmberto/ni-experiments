@@ -1,4 +1,4 @@
-from tensorflow.keras import models, layers
+from keras import models, layers
 
 
 class Autoencoder(models.Model):
