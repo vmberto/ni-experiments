@@ -8,7 +8,7 @@ from lib.helpers import seaborn_styles, prepare_df, bootstrap_confidence_interva
 # Paths
 results = pd.concat([
     pd.read_csv('../../results/agnews/tinytransformer-cnntext-bilstm.csv'),
-    pd.read_csv('../../output/experiment_2025-07-08_15-19-33/output.csv'),
+    pd.read_csv('../../output/BiLSTM-CurriculumLearning/output.csv'),
 ], ignore_index=True)
 CATEGORIES_DF_PATH = '../../results/agnews/agnews_c_divergences_categories.csv'
 

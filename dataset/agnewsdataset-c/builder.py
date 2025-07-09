@@ -1,7 +1,5 @@
 import string
-from kldiv import compute_kl_divergence
 from lib.consts import AGNEWS_CORRUPTIONS
-from lvsd import compute_levenshtein_distance
 import tensorflow_datasets as tfds
 import pandas as pd
 import os
@@ -262,14 +260,14 @@ def main():
 
     # Define corruptions
     corruptions = {
-        # "typo": typo_injection,
-        # "whitespace": whitespace_noise,
-        # "case_randomization": case_randomization,
-        # "synonym": synonym_replacement,
-        # "deletion": random_word_deletion,
-        # "insertion": random_word_insertion,
-        # "antonym": antonym_replacement,
-        # "sentence_noise_injection": sentence_noise_injection,
+        "typo": typo_injection,
+        "whitespace": whitespace_noise,
+        "case_randomization": case_randomization,
+        "synonym": synonym_replacement,
+        "deletion": random_word_deletion,
+        "insertion": random_word_insertion,
+        "antonym": antonym_replacement,
+        "sentence_noise_injection": sentence_noise_injection,
         "shuffling": word_order_shuffling,
     }
 
@@ -278,47 +276,9 @@ def main():
             corrupted_dataset = apply_corruption(dataset, func, severity)
             output_path = f"{output_dir}ag_news_{name}_{severity}.csv"
 
-            kl_divergence = compute_kl_divergence(dataset['text'], corrupted_dataset['text'])
-            levenshtein_distance = compute_levenshtein_distance(dataset['text'], corrupted_dataset['text'])
-
-            print(f"KL Divergence between original and {name}_{severity}: {kl_divergence:.4f}")
-            print(f"Average Levenshtein Distance between original and {name}_{severity}:: {levenshtein_distance['average_distance']:.2f}")
-
             corrupted_dataset.to_csv(output_path, index=False)
             print(f"Saved: {output_path}")
 
 
-def calculate_distances_with_characterization():
-    ds = load_ag_news_from_tfds()
-
-    results = []
-
-    # Iterate over all corruptions
-    for name in AGNEWS_CORRUPTIONS:
-        corrupted_ds_path = f"{os.getcwd()}/ag_news_{name}.csv"
-        corrupted_ds = pd.read_csv(corrupted_ds_path)
-
-        # Extract texts
-        original_texts = ds['text'].astype(str).tolist()
-        corrupted_texts = corrupted_ds['text'].astype(str).tolist()
-
-        # Compute the distance
-        distance = compute_levenshtein_distance(original_texts, corrupted_texts)
-        distance = distance['average_distance']
-
-        # Append results
-        results.append({
-            "corruption": name,
-            "divergence": distance
-        })
-
-    # Convert results to a DataFrame
-    df = pd.DataFrame(results)
-    output_path = "../../results/agnews/agnews_c_divergences.csv"
-    df.to_csv(output_path, index=False)
-
-    print(f"Characterized CSV saved at {output_path}")
-
-
 if __name__ == "__main__":
-    calculate_distances_with_characterization()
+    main()

@@ -4,8 +4,8 @@ from layers.text_randaugment import get_text_randaugment_layers
 from lib.consts import AGNEWS_CORRUPTIONS
 from layers.random_salt_and_pepper import RandomSaltAndPepper
 from layers.custom_gaussian_noise import CustomGaussianNoise
-from models.word_cnn import CNNTextModel
-from models.bilstm import BiLSTMModel
+from models.cnn_text import CNNTextModel
+# from models.bilstm import BiLSTMModel
 from models.tiny_transformer import TinyTransformerModel
 
 
@@ -24,9 +24,9 @@ RandAugment = get_text_randaugment_layers()
 
 
 MODEL_ARCHITECTURES = [
-    # CNNTextModel,
-    BiLSTMModel,
-    # TinyTransformerModel
+    CNNTextModel,
+    # BiLSTMModel,
+    TinyTransformerModel
 ]
 
 

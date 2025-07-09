@@ -1,52 +1,58 @@
+import os
 import pandas as pd
-from keras import callbacks
-
+from keras import models
 from lib.consts import AGNEWS_CORRUPTIONS
-from cifar_experiments_config import KFOLD_N_SPLITS
 from models.text_autoencoder import TextAutoencoder
-from dataset.agnewsdataset import AGNewsDataset  # You should implement this class
+from dataset.agnewsdataset import AGNewsDataset
 
-MAX_SEQUENCE_LENGTH=128
-VOCAB_SIZE=20000
-BATCH_SIZE=128
-EMBEDDING_DIM=128
+MAX_SEQUENCE_LENGTH = 128
+VOCAB_SIZE = 10000
+BATCH_SIZE = 256
+EMBEDDING_DIM = 128
+LATENT_DIM = 128
+MODEL_PATH = "../saved_models/text_encoder/static_encoder.keras"
+RESULT_PATH = "../output/agnews_encoder_kldiv.csv"
+
 
 def main():
-    dataset = AGNewsDataset(max_sequence_length=MAX_SEQUENCE_LENGTH, vocab_size=VOCAB_SIZE, batch_size=BATCH_SIZE)
+    os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
+    os.makedirs(os.path.dirname(RESULT_PATH), exist_ok=True)
 
-    x_train, x_test, splits = dataset.prepare_kfold_for_autoencoder(KFOLD_N_SPLITS)
+    dataset = AGNewsDataset(
+        max_sequence_length=MAX_SEQUENCE_LENGTH,
+        vocab_size=VOCAB_SIZE,
+        batch_size=BATCH_SIZE
+    )
+
+    x_test = dataset.get_testset_for_autoencoder()  # Just to get full x_test
     test_ds = dataset.get_dataset_for_autoencoder(x_test)
 
+    # Load or build encoder
+    encoder = TextAutoencoder(
+        vocab_size=VOCAB_SIZE,
+        embedding_dim=EMBEDDING_DIM,
+        max_len=MAX_SEQUENCE_LENGTH,
+        latent_dim=LATENT_DIM
+    )
+
+    # Compute KL divergence for each corruption
     results = []
+    print("Calculating KL divergences...")
+    for corruption_type in AGNEWS_CORRUPTIONS:
+        print(f"  Processing corruption: {corruption_type}")
+        kld = dataset.prepare_agnews_c_with_distances(encoder, corruption_type, test_ds)
 
-    for fold, (train_index, val_index) in splits:
-        train_fold_ds = dataset.get_dataset_for_autoencoder(x_train[train_index])
-        val_fold_ds = dataset.get_dataset_for_autoencoder(x_train[val_index])
+        results.append({
+            "corruption_type": corruption_type,
+            "divergence": kld,
+        })
 
-        autoencoder = TextAutoencoder(vocab_size=VOCAB_SIZE, embedding_dim=EMBEDDING_DIM, max_len=MAX_SEQUENCE_LENGTH)
-        autoencoder.compile(optimizer='adam', loss='sparse_categorical_crossentropy')
+        # Save incrementally
+        pd.DataFrame(results).to_csv(RESULT_PATH, index=False)
+        print(f"Saved interim results after corruption: {corruption_type}")
 
-        autoencoder.fit(
-            train_fold_ds,
-            epochs=100,
-            shuffle=True,
-            validation_data=val_fold_ds,
-            callbacks=[
-                callbacks.EarlyStopping(patience=10, monitor='val_loss', restore_best_weights=True, verbose=1)
-            ]
-        )
-
-        encoder = autoencoder.encoder
-
-        for corruption_type in AGNEWS_CORRUPTIONS:
-            kld = dataset.prepare_agnews_c_with_distances(encoder, corruption_type, test_ds)
-            result = {
-                "fold": fold,
-                "corruption_type": corruption_type,
-                "kl_divergences": kld,
-            }
-            results.append(result)
-            pd.DataFrame(results).to_csv('../output/agnews_autoencoder_kldiv.csv', index=False)
+    print("\n=== Completed ===")
+    print(f"KL Divergences saved to: {RESULT_PATH}")
 
 
 if __name__ == "__main__":

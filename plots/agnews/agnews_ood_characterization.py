@@ -13,7 +13,8 @@ rcParams['xtick.labelsize'] = 26  # X tick font size
 rcParams['ytick.labelsize'] = 26  # Y tick font size
 rcParams['legend.fontsize'] = 18  # Legend font size
 
-file_path = '../../results/agnews/agnews_c_divergences.csv'  # Replace with your actual file path
+# file_path = '../../results/agnews/agnews_c_divergences.csv'  # Replace with your actual file path
+file_path = '../../output/agnews_encoder_kldiv.csv'  # Replace with your actual file path
 data = pd.read_csv(file_path)
 
 

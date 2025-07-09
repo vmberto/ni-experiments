@@ -6,6 +6,7 @@ import tensorflow_datasets as tfds
 from keras import layers, models
 import pandas as pd
 from lib.metrics import calculate_kl_divergence
+import os
 
 
 class AGNewsDataset:
@@ -24,16 +25,33 @@ class AGNewsDataset:
     def preprocess_text(self, text):
         return self.text_vectorizer(text)
 
-    def prepare_text_vectorizer(self, ds):
-        print('Adapting vectorizer...')
-        text_ds = ds.map(lambda x, y: x).prefetch(buffer_size=self.AUTOTUNE)
-        self.text_vectorizer.adapt(text_ds)
+    def prepare_text_vectorizer(self, ds, vocab_path="agnews_vocab.txt"):
+        if os.path.exists(vocab_path):
+            print("🔁 Loading cached vocabulary...")
+            with open(vocab_path, "r", encoding="utf-8") as f:
+                vocab = f.read().splitlines()
+            self.text_vectorizer.set_vocabulary(vocab)
+        else:
+            print("🧠 Adapting vectorizer...")
+            text_ds = ds.map(lambda x, y: x).prefetch(self.AUTOTUNE)
+            self.text_vectorizer.adapt(text_ds)
+            # Save vocabulary
+            vocab = self.text_vectorizer.get_vocabulary()
+            with open(vocab_path, "w", encoding="utf-8") as f:
+                f.write("\n".join(vocab))
+            print("✅ Vocabulary saved.")
 
-    def prepare(self, ds, shuffle=False, data_augmentation=None):
-        ds = ds.map(
-            lambda x, y: (self.preprocess_text(x), self.preprocess_text(y)),
-            num_parallel_calls=self.AUTOTUNE,
-        )
+    def prepare(self, ds, shuffle=False, data_augmentation=None, autoencoder=False):
+        if autoencoder:
+            ds = ds.map(
+                lambda x, y: (self.preprocess_text(x), self.preprocess_text(x)),
+                num_parallel_calls=self.AUTOTUNE,
+            ).cache()
+        else:
+            ds = ds.map(
+                lambda x, y: (self.preprocess_text(x), self.preprocess_text(y)),
+                num_parallel_calls=self.AUTOTUNE,
+            )
 
         if shuffle:
             ds = ds.shuffle(1000)
@@ -115,15 +133,25 @@ class AGNewsDataset:
         texts = [str(text).encode('utf-8').decode('utf-8') for text in df['text'].tolist()]
         return self.prepare(Dataset.from_tensor_slices((texts, labels)))
 
-    def get_dataset_for_autoencoder(self, x_data, augmentation_layer=None):
-        return self.prepare(Dataset.from_tensor_slices((x_data, x_data)), data_augmentation=augmentation_layer)
+    def get_dataset_for_autoencoder(self, x_data):
+        return self.prepare(Dataset.from_tensor_slices((x_data, x_data)), autoencoder=True)
 
     def prepare_agnews_c_with_distances(self, encoder, corruption_type, test_ds):
-        corrupted_ds = self.get_corrupted(corruption_type)
+        filepath = f'../dataset/agnewsdataset-c/ag_news_{corruption_type}.csv'
+        df = pd.read_csv(filepath, encoding='utf-8')
+        texts = [str(text).encode('utf-8').decode('utf-8') for text in df['text'].tolist()]
+        corrupted_ds = self.prepare(Dataset.from_tensor_slices((texts, texts)), autoencoder=True)
+
         latent_clean = encoder.predict(test_ds)
         latent_corrupted = encoder.predict(corrupted_ds)
         return calculate_kl_divergence(latent_clean, latent_corrupted)
 
-    def prepare_kfold_for_autoencoder(self, n_splits):
-        train_texts, _, test_texts, _, dataset_splits = self.get_kfold_splits(n_splits)
-        return train_texts, test_texts, dataset_splits
+    def get_testset_for_autoencoder(self):
+        _, ds_test = self.load_and_preprocess()
+
+        test_texts, test_labels = [], []
+        for text, label in tfds.as_numpy(ds_test):
+            test_texts.append(text.decode("utf-8"))
+        test_texts = np.array(test_texts)
+
+        return test_texts

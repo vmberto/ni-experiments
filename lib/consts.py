@@ -110,11 +110,4 @@ AGNEWS_CORRUPTIONS = [
     'shuffling_1', 'shuffling_2', 'shuffling_3', 'shuffling_4', 'shuffling_5',
 ]
 
-
-MIMII_OOD_MACHINES = [
-    'id_02',
-    'id_04',
-    'id_06',
-]
-
 IN_DISTRIBUTION_LABEL = 'in-distribution'

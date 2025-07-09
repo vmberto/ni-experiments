@@ -13,13 +13,12 @@ STRATEGIES_ORDER = {
     'RandAugment': 3,
     'RandAugment+S&P': 4,
     'RandAugment+Gaussian': 5,
-    # 'Curriculum Learning': 6,
+    'Curriculum Learning': 6,
 }
 
 results = pd.concat([
-    pd.read_csv('../../output/CNNText/output.csv'),
-    pd.read_csv('../../output/TinyTransformer/output.csv'),
-    pd.read_csv('../../output/experiment_2025-07-04_13-02-20/output.csv'),
+    pd.read_csv('../../results/agnews/tinytransformer-cnntext-bilstm.csv'),
+    pd.read_csv('../../output/BiLSTM-CurriculumLearning/output.csv'),
 ], ignore_index=True)
 CATEGORIES_DF_PATH = '../../results/agnews/agnews_c_divergences_categories.csv'
 
