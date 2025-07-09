@@ -1,12 +1,8 @@
 import string
-from lib.consts import AGNEWS_CORRUPTIONS
 import tensorflow_datasets as tfds
 import pandas as pd
-import os
-import random
 import nltk
 from nltk.corpus import wordnet
-import re
 import spacy
 
 nltk.download('wordnet')
@@ -15,7 +11,6 @@ nltk.download('wordnet')
 # Character-Level Corruptions
 # -----------------------------
 def typo_injection(text, severity):
-    """Introduce random typos by swapping adjacent characters."""
     text = list(text)
     num_typos = severity * 12
     for _ in range(num_typos):
@@ -29,22 +24,18 @@ def typo_injection(text, severity):
 def whitespace_noise(text, severity):
     words = text.split()
 
-    # Severity controls the number of spaces to add/remove
     for _ in range(severity):
         noise_type = random.choice(["add", "remove", "split"])
 
         if noise_type == "add":
-            # Add random extra spaces between words
             idx = random.randint(0, len(words) - 2)
             words[idx] += " " * random.randint(1, severity)
 
         elif noise_type == "remove":
-            # Remove spaces between words
             idx = random.randint(0, len(words) - 2)
             words[idx] += words.pop(idx + 1)  # Merge with next word
 
         elif noise_type == "split":
-            # Split a word by adding spaces in the middle
             idx = random.randint(0, len(words) - 1)
             word = words[idx]
             if len(word) > 3:  # Ensure the word is long enough
@@ -57,16 +48,6 @@ def whitespace_noise(text, severity):
 
 
 def case_randomization(text, severity):
-    """
-    Randomly alter the case of letters in the text.
-
-    Args:
-        text (str): Input text.
-        severity (int): Severity level (1-5), determines the frequency of randomization.
-
-    Returns:
-        str: Text with random case applied.
-    """
     randomized_text = []
     for char in text:
         if char.isalpha() and random.random() < severity / 5:  # Severity controls randomness
@@ -80,7 +61,6 @@ def case_randomization(text, severity):
 # Word-Level Corruptions
 # -----------------------------
 def synonym_replacement(text, severity):
-    """Replace words with their synonyms."""
     words = text.split()
     for _ in range(severity * 20):
         if not words:
@@ -125,29 +105,31 @@ def random_word_insertion(text, severity):
 
 
 def random_word_deletion(text, severity):
-    """Randomly delete words based on severity."""
     words = text.split()
-    num_deletions = severity * 20
+    num_deletions = severity * 2
     for _ in range(num_deletions):
         if words:
             del words[random.randint(0, len(words) - 1)]
     return " ".join(words)
 
 
+def truncation(text, severity):
+    words = text.split()
+    cutoff = max(1, len(words) - severity * 3)
+    return " ".join(words[:cutoff])
+
+
 def word_order_shuffling(text, severity):
     words = text.split()
     if len(words) < 2:
-        return text  # Skip shuffling for short texts
+        return text
 
-    # Calculate the number of words to shuffle based on severity
     num_words_to_shuffle = max(1, int(len(words) * (severity / 5)))
 
-    # Randomly select words to shuffle
     indices_to_shuffle = random.sample(range(len(words)), num_words_to_shuffle)
     shuffled_words = [words[i] for i in indices_to_shuffle]
     random.shuffle(shuffled_words)
 
-    # Replace the selected words in the original order with shuffled ones
     for idx, shuffled_word in zip(indices_to_shuffle, shuffled_words):
         words[idx] = shuffled_word
 
@@ -158,16 +140,6 @@ def word_order_shuffling(text, severity):
 # Sentence-Level Corruptions
 # -----------------------------
 def sentence_noise_injection(text, severity):
-    """
-    Inject random noise tokens into a sentence based on severity.
-
-    Args:
-        text (str): The input sentence.
-        severity (int): The severity level (1-5), controls the amount of noise injected.
-
-    Returns:
-        str: Text with noise tokens injected.
-    """
     words = text.split()
     num_noise_tokens = severity * max(1, len(words) // 10) * 20  # Proportional to severity
 
@@ -196,45 +168,91 @@ def sentence_noise_injection(text, severity):
 
     return " ".join(words)
 
-
 # -----------------------------
 # Semantic Corruptions
 # -----------------------------
 nlp = spacy.load("en_core_web_sm")
 
-
 def entity_masking(text, severity):
-    """
-    Replace a proportion of named entities in text with placeholders based on severity.
-
-    Args:
-        text (str): Input text.
-        severity (int): Severity level (1-5), determines the proportion of entities to mask.
-
-    Returns:
-        str: Text with named entities replaced by placeholders.
-    """
     doc = nlp(text)
     masked_text = text
     entities = [(ent.text, ent.label_) for ent in doc.ents if ent.label_ in ["PERSON", "ORG", "GPE", "LOC"]]
 
-    # If no entities are found, return the original text
     if not entities:
         return masked_text
 
-    # Calculate the number of entities to mask based on severity
     num_to_mask = min(len(entities), max(1, int(len(entities) * (severity / 5.0))))
-
-    # Randomly sample entities to mask
     entities_to_mask = random.sample(entities, num_to_mask)
 
-    # Replace selected entities with placeholders
     for ent_text, ent_label in entities_to_mask:
         placeholder = f"<{ent_label.lower()}>"
         masked_text = re.sub(rf"\b{re.escape(ent_text)}\b", placeholder, masked_text)
 
     return masked_text
 
+
+from nltk.corpus import opinion_lexicon
+nltk.download('opinion_lexicon')
+def sentiment_masking(text, severity):
+    words = text.split()
+    new_words = []
+    num_to_mask = int(len(words) * severity)  # Severity controls fraction
+
+    pos_words = set(opinion_lexicon.positive())
+    neg_words = set(opinion_lexicon.negative())
+    sentiment_words = pos_words.union(neg_words)
+
+    masked = 0
+    for word in words:
+        lower_word = word.lower().strip(string.punctuation)
+        if lower_word in sentiment_words and masked < num_to_mask:
+            new_words.append("<mask>")
+            masked += 1
+        else:
+            new_words.append(word)
+
+    return " ".join(new_words)
+
+
+import re
+import random
+from num2words import num2words
+def digits_to_words(text, severity):
+    def replace_digits_in_word(word):
+        return re.sub(r'\d+(\.\d+)?', lambda m: convert_number(m.group()), word)
+
+    def convert_number(number):
+        try:
+            if '.' in number:
+                return num2words(float(number))
+            else:
+                return num2words(int(number))
+        except Exception:
+            return number  # In case of error, return original
+
+    if not (1 <= severity <= 5):
+        raise ValueError("Severity must be between 1 and 5.")
+
+    scale = severity / 5.0  # Normalize severity to 0.2 – 1.0
+
+    words = re.findall(r'\w+|\W+', text)
+    digit_word_indices = [i for i, w in enumerate(words) if re.search(r'\d', w)]
+
+    num_to_replace = int(len(digit_word_indices) * scale)
+    if num_to_replace == 0:
+        return text  # No corruption if no matches
+
+    selected_indices = random.sample(digit_word_indices, num_to_replace)
+
+    for i in selected_indices:
+        words[i] = replace_digits_in_word(words[i])
+
+    return ''.join(words)
+
+
+# -----------------------------
+# Main Code
+# -----------------------------
 def load_ag_news_from_tfds():
     dataset = tfds.load("ag_news_subset", split="test", as_supervised=True)
     test_texts, test_labels = [], []
@@ -244,31 +262,27 @@ def load_ag_news_from_tfds():
 
     return pd.DataFrame({"label": test_labels, "text": test_texts})
 
-
-# Apply Corruptions
 def apply_corruption(data, corruption_func, severity):
     corrupted_data = data.copy()
     corrupted_data["text"] = data["text"].apply(lambda x: corruption_func(x, severity))
     return corrupted_data
 
 
-# Main Function
 def main():
     output_dir = "./"
     severities = [1, 2, 3, 4, 5]
     dataset = load_ag_news_from_tfds()
 
-    # Define corruptions
     corruptions = {
         "typo": typo_injection,
         "whitespace": whitespace_noise,
-        "case_randomization": case_randomization,
         "synonym": synonym_replacement,
         "deletion": random_word_deletion,
         "insertion": random_word_insertion,
         "antonym": antonym_replacement,
         "sentence_noise_injection": sentence_noise_injection,
         "shuffling": word_order_shuffling,
+        "truncation": truncation,
     }
 
     for name, func in corruptions.items():

@@ -137,7 +137,7 @@ class AGNewsDataset:
         return self.prepare(Dataset.from_tensor_slices((x_data, x_data)), autoencoder=True)
 
     def prepare_agnews_c_with_distances(self, encoder, corruption_type, test_ds):
-        filepath = f'../dataset/agnewsdataset-c/ag_news_{corruption_type}.csv'
+        filepath = f'../../dataset/agnewsdataset-c/ag_news_{corruption_type}.csv'
         df = pd.read_csv(filepath, encoding='utf-8')
         texts = [str(text).encode('utf-8').decode('utf-8') for text in df['text'].tolist()]
         corrupted_ds = self.prepare(Dataset.from_tensor_slices((texts, texts)), autoencoder=True)
