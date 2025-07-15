@@ -108,15 +108,18 @@ def plot_results(df):
         for y in range(1, len(severity_order)):
             ax.axhline(y=y - 0.5, color='grey', linestyle='--', linewidth=1)
 
-        if i == 0:
-            ax.set_ylabel("Severity", fontsize=42)
-        else:
+        if i != 0:
             ax.set_yticklabels([])
-            ax.set_ylabel("")
 
-        ax.tick_params(axis='x', labelsize=24)
-        ax.tick_params(axis='y', labelsize=24)
-        ax.set_title(model_name, fontsize=42)
+        if i == 1:
+            ax.set_title('WideResNet-28-10', fontsize=42)
+        else:
+            ax.set_title(model_name, fontsize=42)
+
+        ax.set_ylabel("")
+
+        ax.tick_params(axis='x', labelsize=28)
+        ax.tick_params(axis='y', labelsize=32)
 
     for ax in axes:
         ax.legend_.remove()
@@ -127,12 +130,12 @@ def plot_results(df):
         handle.set_markersize(30)
 
     fig.legend(
-        handles, labels, title="Strategy", loc='lower center',
-        bbox_to_anchor=(0.5, -0.42), fontsize=42, title_fontsize=42, ncol=3
+        handles, labels, loc='lower center',
+        bbox_to_anchor=(0.5, -0.24), fontsize=42, title_fontsize=42, ncol=3
     )
-    fig.suptitle('Distributions Domain Range', fontsize=50, y=1)
     plt.tight_layout()
-    plt.savefig('../output/cifar_results_by_kl_divergence.png', bbox_inches='tight')
+    plt.savefig('../../results/cifar10/cifar_results_by_domain.pdf', bbox_inches='tight')
+    plt.savefig('../../results/cifar10/cifar_results_by_domain.png', bbox_inches='tight')
     plt.show()
 
 # Plot
