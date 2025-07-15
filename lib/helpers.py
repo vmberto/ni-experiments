@@ -2,7 +2,6 @@ import numpy as np
 from scipy import stats
 import pandas as pd
 import re
-import inspect
 
 
 def bootstrap_confidence_interval(data, num_samples=1000, ci=0.95, metric=np.mean):
@@ -64,10 +63,3 @@ def clean_string(s):
 
 def filter_active(configurations):
     return [config for config in configurations if config.get("active", False)]
-
-
-
-def init_model(model_architecture, **kwargs):
-    sig = inspect.signature(model_architecture)
-    filtered_kwargs = {k: v for k, v in kwargs.items() if k in sig.parameters}
-    return model_architecture(**filtered_kwargs)

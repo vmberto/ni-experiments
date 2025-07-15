@@ -5,7 +5,6 @@ import numpy as np
 from lib.helpers import seaborn_styles, bootstrap_confidence_interval
 seaborn_styles(sns)
 
-# Define the order of strategies
 STRATEGIES_ORDER = {
     'Baseline': 0,
     'Salt&Pepper': 1,
@@ -17,12 +16,10 @@ STRATEGIES_ORDER = {
 }
 
 results = pd.concat([
-    pd.read_csv('../../results/agnews/tinytransformer-cnntext-bilstm.csv'),
-    pd.read_csv('../../output/BiLSTM-CurriculumLearning/output.csv'),
+    pd.read_csv('../../output/experiment_complete/output.csv'),
 ], ignore_index=True)
-CATEGORIES_DF_PATH = '../../results/agnews/agnews_c_divergences_categories.csv'
-
-characterization_df = pd.read_csv('../../results/agnews/agnews_c_divergences_categories.csv')
+CATEGORIES_DF_PATH = '../../results/agnews/agnews_encoder_kldiv_categories.csv'
+characterization_df = pd.read_csv(CATEGORIES_DF_PATH)
 
 results['evaluation_set'] = results['evaluation_set'].str.replace(' ', '_').str.lower()
 results['evaluation_set'] = results['evaluation_set'].str.replace('-', '_').str.lower()

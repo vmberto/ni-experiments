@@ -42,16 +42,10 @@ class AGNewsDataset:
             print("✅ Vocabulary saved.")
 
     def prepare(self, ds, shuffle=False, data_augmentation=None, autoencoder=False):
-        if autoencoder:
-            ds = ds.map(
-                lambda x, y: (self.preprocess_text(x), self.preprocess_text(x)),
-                num_parallel_calls=self.AUTOTUNE,
-            ).cache()
-        else:
-            ds = ds.map(
-                lambda x, y: (self.preprocess_text(x), self.preprocess_text(y)),
-                num_parallel_calls=self.AUTOTUNE,
-            )
+        ds = ds.map(
+            lambda x, y: (self.preprocess_text(x), y),
+            num_parallel_calls=self.AUTOTUNE,
+        )
 
         if shuffle:
             ds = ds.shuffle(1000)

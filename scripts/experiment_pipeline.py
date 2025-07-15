@@ -136,7 +136,7 @@ def _evaluate_and_log(model, params):
 def experiment(dataset, epochs, kfold_n_splits, configs, model_architectures, corruptions):
     experiments_config = filter_active(configs)
     date_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    experiment_dir = os.path.join(os.getcwd(), f'output/experiment_{date_str}')
+    experiment_dir = os.path.join(os.getcwd(), f'output/experiment_complete')
 
     x_train, y_train, x_test, y_test, splits = dataset.get_kfold_splits(kfold_n_splits)
 

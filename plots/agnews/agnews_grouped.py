@@ -7,10 +7,11 @@ from lib.helpers import seaborn_styles, prepare_df, bootstrap_confidence_interva
 
 # Paths
 results = pd.concat([
-    pd.read_csv('../../results/agnews/tinytransformer-cnntext-bilstm.csv'),
-    pd.read_csv('../../output/BiLSTM-CurriculumLearning/output.csv'),
+    # pd.read_csv('../../results/agnews/tinytransformer-cnntext-bilstm.csv'),
+    # pd.read_csv('../../output/BiLSTM-CurriculumLearning/output.csv'),
+    pd.read_csv('../../output/experiment_complete/output.csv'),
 ], ignore_index=True)
-CATEGORIES_DF_PATH = '../../results/agnews/agnews_c_divergences_categories.csv'
+CATEGORIES_DF_PATH = '../../results/agnews/agnews_encoder_kldiv_categories.csv'
 
 # Constants
 estimator = 'f1-score(weighted avg)'
@@ -26,7 +27,6 @@ def normalize_strategy_name(name: str) -> str:
 
 results['corruption_group'] = results['evaluation_set'].apply(normalize_strategy_name)
 
-results.to_csv('tinytransformer-cnntext-bilstm.csv')
 
 results = prepare_df(results, CATEGORIES_DF_PATH)
 
