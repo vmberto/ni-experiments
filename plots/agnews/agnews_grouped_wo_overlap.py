@@ -8,12 +8,15 @@ from lib.helpers import seaborn_styles, prepare_df, bootstrap_confidence_interva
 
 # Paths
 results = pd.concat([
+    # pd.read_csv('../../results/agnews/tinytransformer-cnntext-bilstm.csv'),
+    # pd.read_csv('../../output/BiLSTM-CurriculumLearning/output.csv'),
     pd.read_csv('../../results/agnews/output.csv'),
 ], ignore_index=True)
 CATEGORIES_DF_PATH = '../../results/agnews/agnews_encoder_kldiv_categories.csv'
 
 # Constants
 estimator = 'f1-score(weighted avg)'
+noise_like = {"sentence_noise_injection"}
 
 seaborn_styles(sns)
 
@@ -25,12 +28,12 @@ def normalize_strategy_name(name: str) -> str:
 
 results['corruption_group'] = results['evaluation_set'].apply(normalize_strategy_name)
 
-# Prepare dataframe
+
 results = prepare_df(results, CATEGORIES_DF_PATH)
 
-# Subsets
 in_dist = results[results['evaluation_set'] == 'in_distribution']
 corruptions = results[results['evaluation_set'] != 'in_distribution']
+corruptions_wo_noise = corruptions[~corruptions['corruption_group'].isin(noise_like)]
 
 # Utility to format CI output
 def format_no_leading_zero(x):
@@ -40,6 +43,7 @@ def bootstrap_ci_format(series, n_bootstrap=1000, ci=95):
     values = series.dropna().values
     if len(values) == 0:
         return "–", 0.0
+
     lower, upper = bootstrap_confidence_interval(values, num_samples=n_bootstrap, ci=ci / 100)
     mean = np.mean(values)
     return f"{format_no_leading_zero(mean)} ({format_no_leading_zero(lower)}, {format_no_leading_zero(upper)})", mean
@@ -61,15 +65,17 @@ def summarize_with_ci(df_subset, severity_label):
 
 # Compute summaries
 summary_all = summarize_with_ci(corruptions, 'All Corruptions')
+summary_wo_noise = summarize_with_ci(corruptions_wo_noise, 'All Corruptions w/o Overlap')
 
 # Add summaries to full dataset
-results = pd.concat([results, summary_all], ignore_index=True)
+results = pd.concat([results, summary_wo_noise, summary_all], ignore_index=True)
 
-# ✅ Plot function
+# Plot function
 def plot_results(df):
     df = df.copy()
     severity_order = [
-        "In-Distribution", "All Corruptions", "Lowest", "Mid-Range", "Highest"
+        "In-Distribution", "All Corruptions", "All Corruptions w/o Overlap", "Lowest", "Mid-Range", "Highest",
+
     ]
     strategy_order = [
         "Baseline",
@@ -120,6 +126,7 @@ def plot_results(df):
             ax.set_yticklabels([])
 
         ax.set_ylabel("")
+
         ax.tick_params(axis='x', labelsize=28)
         ax.tick_params(axis='y', labelsize=32)
         ax.set_title(model_name, fontsize=42)
@@ -141,12 +148,13 @@ def plot_results(df):
     plt.savefig('../../results/agnews/agnews_results_by_domain.pdf', bbox_inches='tight')
     plt.show()
 
-# ✅ Plot
+# Plot
 plot_results(results)
 
-# ✅ Compute summaries for all severity levels
+# 📌 Compute summaries for each severity level
 in_dist_summary = summarize_with_ci(in_dist, 'In-Distribution')
 corruptions_all = summarize_with_ci(corruptions, 'All Corruptions')
+corruptions_wo_noise_summary = summarize_with_ci(corruptions_wo_noise, 'All Corruptions w/o Overlap')
 
 lowest = results[results['Severity'] == 'Lowest']
 midrange = results[results['Severity'] == 'Mid-Range']
@@ -156,30 +164,36 @@ lowest_summary = summarize_with_ci(lowest, 'Lowest')
 midrange_summary = summarize_with_ci(midrange, 'Mid-Range')
 highest_summary = summarize_with_ci(highest, 'Highest')
 
-# ✅ Concatenate all summaries
+# Concatenate all summaries
 all_summaries = pd.concat([
     in_dist_summary,
     corruptions_all,
+    corruptions_wo_noise_summary,
     lowest_summary,
     midrange_summary,
     highest_summary
 ])
 
-# ✅ Pivot the table: rows = (model, strategy), columns = Severity
+# Pivot the table: rows = (model, strategy), columns = Severity
 summary_df = all_summaries.pivot(index=['model', 'strategy'], columns='Severity', values='ci').reset_index()
 
-# ✅ Compute average epochs_run per (model, strategy)
+# Compute average epochs_run per (model, strategy)
 epochs_summary = results.groupby(['model', 'strategy'])['epochs_run'].mean().reset_index()
 epochs_summary['epochs_run'] = epochs_summary['epochs_run'].round(2)
 
-# ✅ Merge into summary_df
+# Merge into summary_df
 summary_df = summary_df.merge(epochs_summary, on=['model', 'strategy'], how='left')
 
-# ✅ Reorder columns
+# Optional: reorder columns
 desired_order = [
-    'In-Distribution', 'All Corruptions', 'Lowest', 'Mid-Range', 'Highest'
+    'In-Distribution',
+    'All Corruptions',
+    'All Corruptions w/o Overlap',
+    'Lowest',
+    'Mid-Range',
+    'Highest'
 ]
 summary_df = summary_df[['model', 'strategy', 'epochs_run'] + [col for col in desired_order if col in summary_df.columns]]
 
-# ✅ Print the final table
+# Print the final table
 print(summary_df.to_string(index=False))

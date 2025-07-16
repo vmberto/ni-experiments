@@ -148,4 +148,9 @@ class AGNewsDataset:
             test_texts.append(text.decode("utf-8"))
         test_texts = np.array(test_texts)
 
-        return test_texts
+        return test_texts.tolist()
+
+    def get_corruptedset_for_autoencoder(self, corruption_type):
+        filepath = f'../../dataset/agnewsdataset-c/ag_news_{corruption_type}.csv'
+        df = pd.read_csv(filepath, encoding='utf-8')
+        return list(df['text'])
