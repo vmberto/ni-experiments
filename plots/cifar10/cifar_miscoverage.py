@@ -12,7 +12,6 @@ STRATEGIES_ORDER = {
     'RandAugment+S&P': 2,
     'RandAugment+Gaussian': 3,
     'Curriculum Learning': 4,
-    'Curriculum Learning V2': 5,
 }
 
 results = pd.concat([
@@ -143,7 +142,7 @@ def plot_results_all_dynamic(df_in, df_out, df_out_wo_noise, x_label='Mean Cente
     x_ticks = [x_min, 0, x_max]
 
     all_strategies = sorted(df_in['strategy'].str.extract(r'^([^_]+)')[0].unique())
-    palette = sns.color_palette("husl", len(all_strategies))
+    palette = sns.color_palette("deep", len(all_strategies))
     palette_dict = {strategy: color for strategy, color in zip(all_strategies, palette)}
 
     for row_idx, model in enumerate(models):
@@ -223,7 +222,8 @@ def plot_results_all_dynamic(df_in, df_out, df_out_wo_noise, x_label='Mean Cente
     )
 
     plt.tight_layout()
-    plt.savefig('../output/dynamic_miscoverage_plot_dynamic_palette.png', bbox_inches='tight')
+    plt.savefig('../../results/cifar10/cifar_miscoverage_results.png', bbox_inches='tight')
+    plt.savefig('../../results/cifar10/cifar_miscoverage_results.pdf', bbox_inches='tight')
     plt.show()
 
 

@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import re
+
+from sympy.printing.pretty.pretty_symbology import line_width
+
 from lib.helpers import seaborn_styles, prepare_df, bootstrap_confidence_interval, markers
 
 # Paths
@@ -64,7 +67,7 @@ def summarize_with_ci(df_subset, severity_label):
 
 # Compute summaries
 summary_all = summarize_with_ci(corruptions, 'All Corruptions')
-summary_wo_noise = summarize_with_ci(corruptions_wo_noise, 'All Corruptions w/o Noise')
+summary_wo_noise = summarize_with_ci(corruptions_wo_noise, 'All Corruptions w/o Overlap')
 
 # Add summaries to full dataset
 results = pd.concat([results, summary_wo_noise, summary_all], ignore_index=True)
@@ -73,7 +76,7 @@ results = pd.concat([results, summary_wo_noise, summary_all], ignore_index=True)
 def plot_results(df):
     df = df.copy()
     severity_order = [
-        "In-Distribution", "All Corruptions", "All Corruptions w/o Noise", "Lowest", "Mid-Range", "Highest",
+        "In-Distribution", "All Corruptions", "All Corruptions w/o Overlap", "Lowest", "Mid-Range", "Highest",
 
     ]
     strategy_order = [
@@ -103,7 +106,6 @@ def plot_results(df):
 
         ax = sns.pointplot(
             data=model_results,
-            linestyles='none',
             x=estimator,
             y='Severity',
             hue='strategy',
@@ -111,7 +113,7 @@ def plot_results(df):
             order=severity_order,
             markers=markers,
             dodge=0.7 if num_strategies > 1 else False,
-            err_kws={'linewidth': 3},
+            linewidth=4.5,
             errorbar=('ci', 95),
             ax=axes[i]
         )
@@ -120,7 +122,7 @@ def plot_results(df):
         ax.set_xlim(0.4, .95)
 
         for y in range(1, len(severity_order)):
-            ax.axhline(y=y - 0.5, color='grey', linestyle='--', linewidth=1)
+            ax.axhline(y=y - 0.5, color='grey', linestyle='-', linewidth=1)
 
         if i != 0:
             ax.set_yticklabels([])
@@ -154,7 +156,7 @@ plot_results(results)
 # 📌 Compute summaries for each severity level
 in_dist_summary = summarize_with_ci(in_dist, 'In-Distribution')
 corruptions_all = summarize_with_ci(corruptions, 'All Corruptions')
-corruptions_wo_noise_summary = summarize_with_ci(corruptions_wo_noise, 'All Corruptions w/o Noise')
+corruptions_wo_noise_summary = summarize_with_ci(corruptions_wo_noise, 'All Corruptions w/o Overlap')
 
 lowest = results[results['Severity'] == 'Lowest']
 midrange = results[results['Severity'] == 'Mid-Range']
@@ -188,7 +190,7 @@ summary_df = summary_df.merge(epochs_summary, on=['model', 'strategy'], how='lef
 desired_order = [
     'In-Distribution',
     'All Corruptions',
-    'All Corruptions w/o Noise',
+    'All Corruptions w/o Overlap',
     'Lowest',
     'Mid-Range',
     'Highest'
