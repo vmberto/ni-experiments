@@ -16,7 +16,7 @@ STRATEGIES_ORDER = {
 }
 
 results = pd.concat([
-    pd.read_csv('../../output/experiment_complete/output.csv'),
+    pd.read_csv('../../results/agnews/output.csv'),
 ], ignore_index=True)
 CATEGORIES_DF_PATH = '../../results/agnews/agnews_encoder_kldiv_categories.csv'
 characterization_df = pd.read_csv(CATEGORIES_DF_PATH)

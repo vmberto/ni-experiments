@@ -74,6 +74,22 @@ CONFIGS = [
         "curriculum_learning": True,
         "active": False,
     },
+    {
+        "strategy_name": 'Gaussian',
+        "data_augmentation_layers": [
+            CustomGaussianNoise(max_stddev=GAUSSIAN_STDDEV),
+        ],
+        "curriculum_learning": False,
+        "active": True,
+    },
+    {
+        "strategy_name": 'Salt&Pepper',
+        "data_augmentation_layers": [
+            RandomSaltAndPepper(max_factor=SALT_PEPPER_FACTOR),
+        ],
+        "curriculum_learning": False,
+        "active": True,
+    },
 ]
 
 
