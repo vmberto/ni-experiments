@@ -23,8 +23,8 @@ RandAugment = get_text_randaugment_layers()
 
 
 MODEL_ARCHITECTURES = [
-    # CNNTextModel,
-    # BiLSTMModel,
+    CNNTextModel,
+    BiLSTMModel,
     TinyTransformerModel
 ]
 

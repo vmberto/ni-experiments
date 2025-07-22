@@ -105,7 +105,7 @@ def plot_results(df):
             order=severity_order,
             markers=markers,
             dodge=0.7 if num_strategies > 1 else False,
-            linewidth=4.5,
+            linewidth=5,
             errorbar=('ci', 95),
             ax=axes[i]
         )
