@@ -27,19 +27,19 @@ class AGNewsDataset:
 
     def prepare_text_vectorizer(self, ds, vocab_path="agnews_vocab.txt"):
         if os.path.exists(vocab_path):
-            print("🔁 Loading cached vocabulary...")
+            print("Loading cached vocabulary...")
             with open(vocab_path, "r", encoding="utf-8") as f:
                 vocab = f.read().splitlines()
             self.text_vectorizer.set_vocabulary(vocab)
         else:
-            print("🧠 Adapting vectorizer...")
+            print("Adapting vectorizer...")
             text_ds = ds.map(lambda x, y: x).prefetch(self.AUTOTUNE)
             self.text_vectorizer.adapt(text_ds)
             # Save vocabulary
             vocab = self.text_vectorizer.get_vocabulary()
             with open(vocab_path, "w", encoding="utf-8") as f:
                 f.write("\n".join(vocab))
-            print("✅ Vocabulary saved.")
+            print("Vocabulary saved.")
 
     def prepare(self, ds, shuffle=False, data_augmentation=None, autoencoder=False):
         ds = ds.map(
