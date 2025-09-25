@@ -72,4 +72,8 @@ class Cifar10Dataset:
 
         latent_clean = encoder.predict(test_ds)
         latent_corrupted = encoder.predict(corrupted_ds)
+
+        print(f"latent_clean shape: {latent_clean.shape}")
+        print(f"latent_corrupted shape: {latent_corrupted.shape}")
+
         return calculate_kl_divergence(latent_clean, latent_corrupted)

@@ -13,7 +13,7 @@ import io
 # Parameters
 output_dir = f'../../output'
 os.makedirs(output_dir, exist_ok=True)
-gif_path = os.path.join(output_dir, "cifar10_randaug_noise.gif")
+gif_path = os.path.join(output_dir, "cifar10_randaug_noise.pdf")
 num_frames = 15
 
 def normalize_image(image):

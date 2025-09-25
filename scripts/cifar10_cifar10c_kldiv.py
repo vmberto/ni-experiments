@@ -23,7 +23,7 @@ def main():
 
         autoencoder.fit(
             train_fold_ds,
-            epochs=100,
+            epochs=1,
             shuffle=True,
             validation_data=val_fold_ds,
             callbacks=[

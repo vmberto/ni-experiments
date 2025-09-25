@@ -5,7 +5,7 @@ from models.experimental_model import ExperimentalModel
 
 class ResNet20Model(ExperimentalModel):
 
-    def __init__(self, input_shape=(32, 32, 3), num_classes=10, strategy_name=''):
+    def __init__(self, input_shape=(32, 32, 3), num_classes=100, strategy_name=''):
         super().__init__(input_shape, num_classes, strategy_name)
         self.name = 'ResNet20'
 

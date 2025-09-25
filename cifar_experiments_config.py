@@ -21,8 +21,8 @@ DATASET = Cifar10Dataset(INPUT_SHAPE, BATCH_SIZE)
 
 RandAugment = keras_cv.layers.RandAugment(value_range=(0, 1), augmentations_per_image=3, magnitude=0.3, rate=1)
 MODEL_ARCHITECTURES = [
-    ResNet20Model,
-    WideResNet28_10Model,
+    # ResNet20Model,
+    # WideResNet28_10Model,
     CCTModel,
 ]
 
@@ -31,7 +31,7 @@ CONFIGS = [
         "strategy_name": 'Baseline',
         "data_augmentation_layers": [],
         "curriculum_learning": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'RandAugment',
@@ -80,7 +80,7 @@ CONFIGS = [
             CustomGaussianNoise(max_stddev=GAUSSIAN_STDDEV),
         ],
         "curriculum_learning": False,
-        "active": True,
+        "active": False,
     },
     {
         "strategy_name": 'Salt&Pepper',
@@ -88,7 +88,7 @@ CONFIGS = [
             RandomSaltAndPepper(max_factor=SALT_PEPPER_FACTOR),
         ],
         "curriculum_learning": False,
-        "active": True,
+        "active": False,
     },
 ]
 

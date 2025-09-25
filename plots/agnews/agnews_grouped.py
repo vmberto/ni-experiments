@@ -4,13 +4,15 @@ import pandas as pd
 import numpy as np
 import re
 
+from matplotlib.lines import Line2D
+
 from lib.helpers import seaborn_styles, prepare_df, bootstrap_confidence_interval, markers
 
 # Paths
 results = pd.concat([
-    pd.read_csv('../../results/agnews/output.csv'),
+    pd.read_csv('../../results/agnews/overall_results.csv'),
 ], ignore_index=True)
-CATEGORIES_DF_PATH = '../../results/agnews/agnews_encoder_kldiv_categories.csv'
+CATEGORIES_DF_PATH = '../../results/agnews/agnews_c_divergences_categories.csv'
 
 # Constants
 estimator = 'f1-score(weighted avg)'
@@ -69,7 +71,7 @@ results = pd.concat([results, summary_all], ignore_index=True)
 def plot_results(df):
     df = df.copy()
     severity_order = [
-        "In-Distribution", "All Corruptions", "Lowest", "Mid-Range", "Highest"
+        "In-Distribution", "Lowest", "Mid-Range", "Highest"
     ]
     strategy_order = [
         "Baseline",
@@ -129,11 +131,20 @@ def plot_results(df):
 
     handles, labels = ax.get_legend_handles_labels()
 
-    for handle in handles:
-        handle.set_markersize(30)
+    new_handles = []
+    for h in handles:
+        new_h = Line2D(
+            [0], [0],
+            marker=h.get_marker(),
+            color=h.get_color(),
+            linestyle='None',
+            markersize=30,
+            label=h.get_label()
+        )
+        new_handles.append(new_h)
 
     fig.legend(
-        handles, labels, loc='lower center',
+        new_handles, labels, loc='lower center',
         bbox_to_anchor=(0.5, -0.32), fontsize=42, title_fontsize=42, ncol=3
     )
     plt.tight_layout()

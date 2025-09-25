@@ -30,9 +30,9 @@ def bootstrap_ci(data, n_bootstrap=1000, ci_level=0.95):
 
 # Categorization by percentile
 def categorize_by_percentiles(pct_value):
-    if pct_value <= 25:
+    if pct_value <= 33:
         return 'Lowest'
-    elif 25 < pct_value <= 75:
+    elif pct_value <= 66:
         return 'Mid-Range'
     else:
         return 'Highest'
@@ -47,7 +47,7 @@ grouped_data['percentile'] = percentiles
 grouped_data['category'] = percentiles.apply(categorize_by_percentiles)
 
 # Save categorized data
-grouped_data.to_csv('../../results/cifar10/cifar_10_c_divergences_categories.csv')
+grouped_data.to_csv('../../results/cifar10/cifar10_c_divergences_categories.csv')
 
 # Category stats
 category_bootstrap = grouped_data.groupby('category')['mean'].apply(lambda x: bootstrap_ci(x.values))
@@ -62,7 +62,7 @@ plt.figure(figsize=(14, 10))
 
 # CIFAR-10 reference point
 plt.scatter(0, 0, color='blue', s=160, zorder=5)
-plt.text(0, -0.15, 'CIFAR-10', ha='center', color='blue', fontsize=22, fontweight='bold')
+plt.text(0, -0.18, 'CIFAR-10', ha='center', color='blue', fontsize=32, fontweight='bold')
 
 # Connect CIFAR-10 to CIFAR-10-C with line
 sns.lineplot(
@@ -91,23 +91,22 @@ for _, row in grouped_data.iterrows():
 # Dynamic Y-axis and annotations
 y_max = grouped_data['upper'].max()
 y_offset = y_max * 0.004
-for cat, pos in zip(['Lowest', 'Mid-Range', 'Highest'], [12.5, 50, 87.5]):
+for cat, pos in zip(['Lowest', 'Mid-Range', 'Highest'], [16, 50, 83]):
     count = (grouped_data['category'] == cat).sum()
     mean, lower, upper = category_stats.loc[cat]
-    plt.text(pos, y_max + y_offset, f'{cat}', ha='center', fontsize=22, fontweight='bold')
-    plt.text(pos, y_max + y_offset - 0.2, f'{count} corruptions\n{mean:.2f} ({lower:.2f}, {upper:.2f})', ha='center', fontsize=20)
+    plt.text(pos, y_max + y_offset, f'{cat}', ha='center', fontsize=30, fontweight='bold')
+    plt.text(pos, y_max + y_offset - 0.28, f'{count} corruptions\n{mean:.2f} ({lower:.2f}, {upper:.2f})', ha='center', fontsize=28)
 
 # Vertical reference lines
-plt.axvline(x=25, color='grey', linestyle='--', linewidth=1)
-plt.axvline(x=75, color='grey', linestyle='--', linewidth=1)
+plt.axvline(x=33, color='grey', linestyle='--', linewidth=1)
+plt.axvline(x=66, color='grey', linestyle='--', linewidth=1)
 
 # Axes and labels
 plt.xlim(0, 101)
 plt.ylim(0, 2.5)
-plt.xlabel('Percentiles')
-plt.ylabel('KL Divergence (CIFAR-10-C)')
-plt.xticks([25, 75])
-plt.title('KL Divergence Distribution Across Percentiles')
+plt.xlabel('Percentiles', fontsize=36)
+plt.ylabel('KL Divergence (CIFAR-10-C)', fontsize=36)
+plt.xticks([33, 66])
 
 # Legend at bottom right
 plt.legend(loc='lower right')

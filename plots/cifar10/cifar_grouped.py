@@ -2,11 +2,13 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from matplotlib.lines import Line2D
+
 from lib.helpers import seaborn_styles, prepare_df, bootstrap_confidence_interval, markers
 
 # Paths
-RAW_RESULTS_PATH = '../../results/cifar10/resnet20_wrn2810_cct.csv'
-CATEGORIES_DF_PATH = '../../results/cifar10/cifar_10_c_divergences_categories.csv'
+RAW_RESULTS_PATH = '../../results/cifar10/overall_results.csv'
+CATEGORIES_DF_PATH = '../../results/cifar10/cifar10_c_divergences_categories.csv'
 
 # Constants
 estimator = 'f1-score(weighted avg)'
@@ -55,22 +57,27 @@ summary_all = summarize_with_ci(corruptions, 'All Corruptions')
 summary_wo_noise = summarize_with_ci(corruptions_wo_noise, 'All Corruptions w/o Overlap')
 
 # Add summaries to full dataset
-results = pd.concat([results, summary_all, summary_wo_noise], ignore_index=True)
+results = pd.concat([results], ignore_index=True)
 
 # Plot function
 def plot_results(df):
     df = df.copy()
-    severity_order = [
-        "In-Distribution", "All Corruptions", "All Corruptions w/o Overlap", "Lowest", "Mid-Range", "Highest",
-
-    ]
     strategy_order = [
         "Baseline",
         "RandAugment",
         "RandAugment+S&P",
         "RandAugment+Gaussian",
-        "Curriculum Learning"
+        "Scheduling Policy"
     ]
+
+    severity_rename_map = {
+        "In-Distribution": "In-Dist.",
+        "Lowest": "Lowest",
+        "Mid-Range": "Mid-Range",
+        "Highest": "Highest"
+    }
+    df["Severity"] = df["Severity"].replace(severity_rename_map)
+    severity_order = ["In-Dist.", "Lowest", "Mid-Range", "Highest"]
 
     df["Severity"] = pd.Categorical(df["Severity"], categories=severity_order, ordered=True)
     df["strategy"] = pd.Categorical(df["strategy"], categories=strategy_order, ordered=True)
@@ -96,13 +103,13 @@ def plot_results(df):
             order=severity_order,
             markers=markers,
             dodge=0.7 if num_strategies > 1 else False,
-            linewidth=4.5,  # ✅ Increase line thickness
+            linewidth=5.5,
             errorbar=('ci', 95),
             ax=axes[i]
         )
 
         ax.set_xlabel("F1-Score", fontsize=42)
-        ax.set_xlim(0.4, 0.95)
+        ax.set_xlim(0.35, 0.95)
 
         for y in range(1, len(severity_order)):
             ax.axhline(y=y - 0.5, color='grey', linestyle='-', linewidth=1)
@@ -110,31 +117,36 @@ def plot_results(df):
         if i != 0:
             ax.set_yticklabels([])
 
-        if i == 1:
-            ax.set_title('WideResNet-28-10', fontsize=42)
-        else:
-            ax.set_title(model_name, fontsize=42)
+        ax.set_title(model_name, fontsize=52)
 
         ax.set_ylabel("")
 
-        ax.tick_params(axis='x', labelsize=28)
-        ax.tick_params(axis='y', labelsize=32)
+        ax.tick_params(axis='x', labelsize=32)
+        ax.tick_params(axis='y', labelsize=52)
 
     for ax in axes:
         ax.legend_.remove()
 
     handles, labels = ax.get_legend_handles_labels()
 
-    for handle in handles:
-        handle.set_markersize(30)
+    new_handles = []
+    for h in handles:
+        new_h = Line2D(
+            [0], [0],
+            marker=h.get_marker(),
+            color=h.get_color(),
+            linestyle='None',
+            markersize=38,
+            label=h.get_label()
+        )
+        new_handles.append(new_h)
 
     fig.legend(
-        handles, labels, loc='lower center',
-        bbox_to_anchor=(0.5, -0.24), fontsize=42, title_fontsize=42, ncol=3
+        new_handles, labels, loc='lower center',
+        bbox_to_anchor=(0.525, -0.24), fontsize=48, title_fontsize=42, ncol=3
     )
     plt.tight_layout()
     plt.savefig('../../results/cifar10/cifar_results_by_domain.pdf', bbox_inches='tight')
-    plt.savefig('../../results/cifar10/cifar_results_by_domain.png', bbox_inches='tight')
     plt.show()
 
 # Plot
