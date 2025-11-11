@@ -154,13 +154,13 @@ def plot_results_all_dynamic(df_in, df_out, x_label='Mean Centered F-Score', fig
     x_ticks = [x_min, 0, x_max]
 
     palette_dict = {
-        'Baseline': '#4C72B0',  # blue
-        'RandAugment+S&P': '#54A868',  # green
-        'Scheduling Policy': '#8172B3',  # purple
-        'RandAugment': '#DD8452',  # orange
-        'RandAugment+Gaussian': '#C44E52',  # red
-        'Salt&Pepper': '#8c564b',  # brown
-        'Gaussian': '#e377c2',  # pink
+        'Baseline': '#4C72B0',
+        'RandAugment+S&P': '#54A868',
+        'Scheduling Policy': '#8172B3',
+        'RandAugment': '#DD8452',
+        'RandAugment+Gaussian': '#C44E52',
+        'Salt&Pepper': '#8c564b',
+        'Gaussian': '#e377c2',
     }
 
     MARKER_MAP = {
