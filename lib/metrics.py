@@ -1,7 +1,6 @@
 from datetime import datetime
 import pandas as pd
 from lib.helpers import clean_string
-from scipy.stats import entropy
 import os
 import shutil
 
@@ -82,37 +81,3 @@ def write_fscore_result(
     df.to_csv(csv_file, index=False)
 
     return experiment_dir
-
-
-def write_auc_results(experiment_dir, machine, strategy_name, model_name, fold_number, auc_value, evaluation_set='In-Distribution'):
-    config_path = './mimii_experiments_config.py'
-    create_experiment_folder(experiment_dir, config_path)
-    csv_file = os.path.join(experiment_dir, 'output.csv')
-
-    new_line = {
-        'machine': machine,
-        'strategy': strategy_name,
-        'model': model_name,
-        'evaluation_set': evaluation_set,
-        'fold': fold_number,
-        'auc_roc': auc_value,
-    }
-
-    try:
-        df = pd.read_csv(csv_file)
-    except FileNotFoundError:
-        df = pd.DataFrame(
-            columns=['strategy', 'model', 'evaluation_set', 'fold', 'auc_roc']
-        )
-
-    df = pd.concat([df, pd.DataFrame([new_line])], ignore_index=True)
-    df.to_csv(csv_file, index=False)
-
-    return experiment_dir
-
-
-def calculate_kl_divergence(latent_clean, latent_corrupted):
-    epsilon = 1e-10
-    latent_clean += epsilon
-    latent_corrupted += epsilon
-    return entropy(latent_clean.flatten(), latent_corrupted.flatten())
