@@ -5,7 +5,7 @@ import numpy as np
 import tensorflow_datasets as tfds
 from keras import layers, models
 import pandas as pd
-from lib.metrics import calculate_kl_divergence
+from dataset.ood_characterization import calculate_kl_divergence
 import os
 
 

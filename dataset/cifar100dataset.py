@@ -5,7 +5,7 @@ import tensorflow_datasets as tfds
 from keras import datasets, models
 from sklearn.model_selection import KFold
 import numpy as np
-from lib.metrics import calculate_kl_divergence
+from dataset.ood_characterization import calculate_kl_divergence
 
 
 class Cifar100Dataset:
@@ -74,4 +74,5 @@ class Cifar100Dataset:
         latent_corrupted = encoder.predict(corrupted_ds)
 
         return calculate_kl_divergence(latent_clean, latent_corrupted)
+
 
