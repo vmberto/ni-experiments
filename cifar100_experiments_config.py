@@ -1,6 +1,6 @@
-from dataset.cifar10dataset import Cifar10Dataset
+from dataset.cifar100dataset import Cifar100Dataset
 from scripts.experiment_pipeline import experiment
-from lib.consts import CIFAR10_CORRUPTIONS
+from lib.consts import CIFAR100_CORRUPTIONS
 import keras_cv
 from layers.random_salt_and_pepper import RandomSaltAndPepper
 from layers.custom_gaussian_noise import CustomGaussianNoise
@@ -17,7 +17,7 @@ GAUSSIAN_STDDEV = .2
 INPUT_SHAPE = (32, 32, 3)
 BATCH_SIZE = 128
 EPOCHS = 200
-DATASET = Cifar10Dataset(INPUT_SHAPE, BATCH_SIZE)
+DATASET = Cifar100Dataset(INPUT_SHAPE, BATCH_SIZE)
 
 RandAugment = keras_cv.layers.RandAugment(value_range=(0, 1), augmentations_per_image=3, magnitude=0.3, rate=1)
 MODEL_ARCHITECTURES = [
@@ -94,4 +94,5 @@ CONFIGS = [
 
 
 if __name__ == '__main__':
-    experiment(DATASET, EPOCHS, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CIFAR10_CORRUPTIONS, num_classes=10, input_shape=INPUT_SHAPE)
+    experiment(DATASET, EPOCHS, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CIFAR100_CORRUPTIONS, num_classes=100, input_shape=INPUT_SHAPE)
+

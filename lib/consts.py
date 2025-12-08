@@ -96,6 +96,9 @@ CIFAR10_CORRUPTIONS = [
     'zoom_blur_5',
 ]
 
+# CIFAR-100 uses the same corruption types as CIFAR-10
+CIFAR100_CORRUPTIONS = CIFAR10_CORRUPTIONS
+
 
 AGNEWS_CORRUPTIONS = [
     'typo_1', 'typo_2', 'typo_3', 'typo_4', 'typo_5',

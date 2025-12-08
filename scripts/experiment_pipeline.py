@@ -10,7 +10,10 @@ from lib.helpers import filter_active
 
 def train_model_with_params(params):
     config = params["config"]
-    model = params["model_architecture"]()
+    # Determine number of classes from dataset
+    num_classes = params.get("num_classes", 10)
+    input_shape = params.get("input_shape", (32, 32, 3))
+    model = params["model_architecture"](input_shape=input_shape, num_classes=num_classes)
 
     print_execution(params["fold"], config["strategy_name"], model.name)
 
@@ -133,7 +136,7 @@ def _evaluate_and_log(model, params):
         )
 
 
-def experiment(dataset, epochs, kfold_n_splits, configs, model_architectures, corruptions):
+def experiment(dataset, epochs, kfold_n_splits, configs, model_architectures, corruptions, num_classes=10, input_shape=(32, 32, 3)):
     experiments_config = filter_active(configs)
     date_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     experiment_dir = os.path.join(os.getcwd(), f'output/experiment_complete')
@@ -158,6 +161,8 @@ def experiment(dataset, epochs, kfold_n_splits, configs, model_architectures, co
                 "val_index": val_index,
                 "fold": fold + 1,
                 "corruptions": corruptions,
+                "num_classes": num_classes,
+                "input_shape": input_shape,
             }
 
             train_model_with_params(params)
