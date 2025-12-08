@@ -7,6 +7,7 @@ from sklearn.model_selection import KFold
 import numpy as np
 from dataset.ood_characterization import calculate_kl_divergence
 from pathlib import Path
+import os
 
 
 class Cifar100Dataset:
@@ -14,7 +15,8 @@ class Cifar100Dataset:
     
     # CIFAR-100-C must be downloaded separately
     # Download from: https://zenodo.org/records/3555552
-    CIFAR100_C_PATH = Path('./dataset/CIFAR-100-C')
+    # Use absolute path to avoid issues when running from different directories
+    CIFAR100_C_PATH = Path(__file__).parent.parent / 'dataset' / 'CIFAR-100-C'
 
     def __init__(self, input_shape, batch_size):
         self.input_shape = input_shape
