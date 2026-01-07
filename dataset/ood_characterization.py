@@ -163,6 +163,13 @@ class WassersteinComparer(DistributionComparer):
         self.rng = np.random.default_rng(random_state)
 
     def _per_feature(self, dist_in: np.ndarray, dist_out: np.ndarray) -> float:
+        # Handle multi-dimensional latent spaces (e.g., from CNNs)
+        # Flatten spatial dimensions: (n_samples, H, W, C) -> (n_samples, H*W*C)
+        if dist_in.ndim > 2:
+            dist_in = dist_in.reshape(dist_in.shape[0], -1)
+        if dist_out.ndim > 2:
+            dist_out = dist_out.reshape(dist_out.shape[0], -1)
+            
         if dist_in.ndim == 1:
             # Fall back to single-dimension case
             return float(wasserstein_distance(dist_in, dist_out))
@@ -182,6 +189,13 @@ class WassersteinComparer(DistributionComparer):
         Sliced Wasserstein: project both clouds onto random 1D directions and
         average the 1D Wasserstein distances.
         """
+        # Handle multi-dimensional latent spaces
+        # Flatten spatial dimensions: (n_samples, H, W, C) -> (n_samples, H*W*C)
+        if dist_in.ndim > 2:
+            dist_in = dist_in.reshape(dist_in.shape[0], -1)
+        if dist_out.ndim > 2:
+            dist_out = dist_out.reshape(dist_out.shape[0], -1)
+            
         # Ensure 2D arrays: (n_samples, latent_dim)
         dist_in = np.atleast_2d(dist_in)
         dist_out = np.atleast_2d(dist_out)

@@ -52,7 +52,8 @@ class WideResNet28_10Model(ExperimentalModel):
         x = layers.BatchNormalization()(x)
         x = layers.ReLU()(x)
         x = layers.GlobalAveragePooling2D()(x)
-        outputs = layers.Dense(self.num_classes, activation='softmax')(x)
+        # Use float32 for final layer for numerical stability in mixed precision
+        outputs = layers.Dense(self.num_classes, activation='softmax', dtype='float32')(x)
 
         model = models.Model(inputs=inputs, outputs=outputs)
         return model

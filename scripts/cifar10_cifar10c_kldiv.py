@@ -6,14 +6,15 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime
 from cifar_experiments_config import KFOLD_N_SPLITS, INPUT_SHAPE, BATCH_SIZE
+import numpy as np
+import tensorflow_datasets as tfds
+from dataset.ood_characterization import calculate_kl_divergence, WassersteinComparer
 
 
 def main():
     # Setup
-    output_dir = Path('../output')
-    models_dir = output_dir / 'models'
+    output_dir = Path(__file__).parent.parent / 'output'
     output_dir.mkdir(parents=True, exist_ok=True)
-    models_dir.mkdir(parents=True, exist_ok=True)
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     results_file = output_dir / f'autoencoder_results_kldiv_{timestamp}.csv'
@@ -44,12 +45,12 @@ def main():
 
         history = autoencoder.fit(
             train_fold_ds,
-            epochs=100,
+            epochs=50,
             shuffle=True,
             validation_data=val_fold_ds,
             callbacks=[
                 callbacks.EarlyStopping(
-                    patience=10,
+                    patience=5,
                     monitor='val_loss',
                     restore_best_weights=True,
                     verbose=1
@@ -58,48 +59,50 @@ def main():
             verbose=1
         )
 
-        # Save models
-        fold_model_dir = models_dir / f'fold_{fold}'
-        fold_model_dir.mkdir(exist_ok=True)
-
-        autoencoder.save(fold_model_dir / 'autoencoder.keras')
-        autoencoder.encoder.save(fold_model_dir / 'encoder.keras')
-        autoencoder.decoder.save(fold_model_dir / 'decoder.keras')
-        pd.DataFrame(history.history).to_csv(
-            fold_model_dir / 'training_history.csv',
-            index=False
-        )
-
-        print(f"✓ Models saved to: {fold_model_dir}")
-
-        # Evaluate
         encoder = autoencoder.encoder
 
         print(f"\nEvaluating {len(CIFAR10_CORRUPTIONS)} corruptions...")
+        
+        # Get clean latent representations (only once per fold)
+        print(f"Encoding clean test set...")
+        latent_clean = encoder.predict(test_ds)
         for i, corruption_type in enumerate(CIFAR10_CORRUPTIONS, 1):
             print(f"[{i}/{len(CIFAR10_CORRUPTIONS)}] {corruption_type}...", end=' ')
 
             try:
-                kld = dataset.prepare_cifar10_c_with_distances(
-                    encoder,
-                    corruption_type,
-                    test_ds,
-                    method='flatten',  # Use 'flatten' to match algorithm
-                    epsilon=1e-10
-                )
+                # Load corrupted images and get latents
+                cifar10_c_ds = tfds.load(f'cifar10_corrupted/{corruption_type}', split='test', as_supervised=True)
+                x_corrupted = np.array([image for image, _ in tfds.as_numpy(cifar10_c_ds)])
+                x_corrupted = x_corrupted.astype('float32') / 255.0
+                
+                corrupted_ds = dataset.get_dataset_for_autoencoder(x_corrupted)
+                latent_corrupted = encoder.predict(corrupted_ds)
+                
+                # Calculate multiple OOD metrics
+                kl_feature_wise = calculate_kl_divergence(latent_clean, latent_corrupted, method='feature_wise')
+                kl_flatten = calculate_kl_divergence(latent_clean, latent_corrupted, method='flatten')
+                kl_histogram = calculate_kl_divergence(latent_clean, latent_corrupted, method='histogram')
+                
+                # Wasserstein distances
+                wd_comparer_per_feature = WassersteinComparer(mode='per_feature')
+                wd_per_feature = wd_comparer_per_feature.compare(latent_clean, latent_corrupted)
+                
+                wd_comparer_sliced = WassersteinComparer(mode='sliced', n_projections=128)
+                wd_sliced = wd_comparer_sliced.compare(latent_clean, latent_corrupted)
 
                 result = {
                     "fold": fold,
                     "corruption_type": corruption_type,
-                    "kl_divergence": kld,
-                    "final_train_loss": history.history['loss'][-1],
-                    "final_val_loss": history.history['val_loss'][-1],
-                    "epochs_trained": len(history.history['loss']),
+                    "kl_feature_wise": kl_feature_wise,
+                    "kl_flatten": kl_flatten,
+                    "kl_histogram": kl_histogram,
+                    "wasserstein_per_feature": wd_per_feature,
+                    "wasserstein_sliced": wd_sliced,
                     "timestamp": timestamp
                 }
 
                 results.append(result)
-                print(f"KL = {kld:.6f} ✓")
+                print(f"KL_fw={kl_feature_wise:.6f}, WD_pf={wd_per_feature:.6f} ✓")
 
                 # Save incrementally
                 pd.DataFrame(results).to_csv(results_file, index=False)
@@ -110,27 +113,11 @@ def main():
 
         print(f"✓ Fold {fold + 1} completed\n")
 
-    # Summary
+    # Final message
     print("=" * 70)
     print("EXPERIMENT COMPLETED")
     print("=" * 70)
-
-    if len(results) > 0:
-        results_df = pd.DataFrame(results)
-        summary = results_df.groupby('corruption_type')['kl_divergence'].agg([
-            'mean', 'std', 'min', 'max'
-        ]).round(6)
-
-        summary_file = output_dir / f'autoencoder_results_kldiv_{timestamp}_summary.csv'
-        summary.to_csv(summary_file)
-
-        print("\nTop 5 Most OOD Corruptions:")
-        top = summary.sort_values('mean', ascending=False).head(5)
-        for idx, (corruption, row) in enumerate(top.iterrows(), 1):
-            print(f"  {idx}. {corruption}: {row['mean']:.6f} ± {row['std']:.6f}")
-
-        print(f"\nResults: {results_file}")
-        print(f"Summary: {summary_file}")
+    print(f"\nResults saved to: {results_file}")
 
 
 if __name__ == "__main__":

@@ -54,7 +54,18 @@ class Cifar10Dataset:
         return self.prepare(cifar_10_c)
 
     def get_dataset_for_autoencoder(self, x_data, augmentation_layer=None):
-        return self.prepare(Dataset.from_tensor_slices((x_data, x_data)), augmentation_layer=augmentation_layer)
+        """Prepare dataset for autoencoder without rescaling (data already normalized)."""
+        ds = Dataset.from_tensor_slices((x_data, x_data))
+        
+        if augmentation_layer:
+            data_augmentation_sequential = models.Sequential(augmentation_layer)
+            ds = ds.map(
+                lambda x, y: (data_augmentation_sequential(x, training=True), y),
+                num_parallel_calls=self.AUTOTUNE
+            )
+        
+        ds = ds.batch(self.batch_size)
+        return ds.prefetch(buffer_size=self.AUTOTUNE)
 
     def prepare_cifar10_kfold_for_autoencoder(self, n_splits):
         (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
@@ -65,6 +76,10 @@ class Cifar10Dataset:
         return x_train, x_test, dataset_splits
 
     def prepare_cifar10_c_with_distances(self, encoder, corruption_type, test_ds):
+        """
+        Calculate KL divergence between clean and corrupted CIFAR-10 images.
+        Uses feature-wise KL divergence for better sensitivity in high-dimensional latent space.
+        """
         dataset = tfds.load(f'cifar10_corrupted/{corruption_type}', split='test', as_supervised=True)
         x_corrupted = np.array([image for image, _ in tfds.as_numpy(dataset)])
         x_corrupted = x_corrupted.astype('float32') / 255.0
@@ -73,4 +88,5 @@ class Cifar10Dataset:
         latent_clean = encoder.predict(test_ds)
         latent_corrupted = encoder.predict(corrupted_ds)
 
-        return calculate_kl_divergence(latent_clean, latent_corrupted)
+        from dataset.ood_characterization import calculate_kl_divergence
+        return calculate_kl_divergence(latent_clean, latent_corrupted, method='feature_wise')

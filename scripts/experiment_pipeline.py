@@ -1,11 +1,26 @@
 import itertools
 from datetime import datetime
 import os
+import gc
+import tensorflow as tf
 from keras import callbacks
 from lib.metrics import write_fscore_result
 from lib.consts import IN_DISTRIBUTION_LABEL
 from lib.logger import print_execution, print_evaluation
 from lib.helpers import filter_active
+
+# Enable mixed precision training for memory efficiency
+tf.keras.mixed_precision.set_global_policy('mixed_float16')
+
+# Configure GPU memory growth to avoid OOM errors
+gpus = tf.config.list_physical_devices('GPU')
+if gpus:
+    try:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        print(f"Configured {len(gpus)} GPU(s) with memory growth enabled")
+    except RuntimeError as e:
+        print(f"GPU memory configuration error: {e}")
 
 
 def train_model_with_params(params):
@@ -17,12 +32,22 @@ def train_model_with_params(params):
 
     print_execution(params["fold"], config["strategy_name"], model.name)
 
-    if config.get("curriculum_learning", False):
-        _run_curriculum_training(model, params)
-    else:
-        _run_standard_training(model, params)
+    try:
+        if config.get("curriculum_learning", False):
+            _run_curriculum_training(model, params)
+        else:
+            _run_standard_training(model, params)
 
-    _evaluate_and_log(model, params)
+        _evaluate_and_log(model, params)
+    finally:
+        # Clean up memory after each model training
+        del model
+        if 'model' in params:
+            del params['model']
+        if 'test_ds' in params:
+            del params['test_ds']
+        tf.keras.backend.clear_session()
+        gc.collect()
 
 
 def _run_standard_training(model, params):

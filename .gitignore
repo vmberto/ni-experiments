@@ -8,6 +8,8 @@ mimii_dataset
 # C extensions
 *.so
 
+*/CIFAR-100-C/*
+
 # Distribution / packaging
 .Python
 build/

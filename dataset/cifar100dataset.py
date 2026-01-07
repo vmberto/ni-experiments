@@ -118,7 +118,18 @@ class Cifar100Dataset:
         return self.prepare(Dataset.from_tensor_slices((x_corrupted, y_corrupted)))
 
     def get_dataset_for_autoencoder(self, x_data, augmentation_layer=None):
-        return self.prepare(Dataset.from_tensor_slices((x_data, x_data)), augmentation_layer=augmentation_layer)
+        """Prepare dataset for autoencoder without rescaling (data already normalized)."""
+        ds = Dataset.from_tensor_slices((x_data, x_data))
+        
+        if augmentation_layer:
+            data_augmentation_sequential = models.Sequential(augmentation_layer)
+            ds = ds.map(
+                lambda x, y: (data_augmentation_sequential(x, training=True), y),
+                num_parallel_calls=self.AUTOTUNE
+            )
+        
+        ds = ds.batch(self.batch_size)
+        return ds.prefetch(buffer_size=self.AUTOTUNE)
 
     def prepare_cifar100_kfold_for_autoencoder(self, n_splits):
         (x_train, y_train), (x_test, y_test) = datasets.cifar100.load_data()
@@ -131,16 +142,8 @@ class Cifar100Dataset:
     def prepare_cifar100_c_with_distances(self, encoder, corruption_type, test_ds):
         """
         Calculate KL divergence between clean and corrupted CIFAR-100 images.
-        
-        Args:
-            encoder: Trained encoder model
-            corruption_type: e.g., 'gaussian_noise_1'
-            test_ds: Clean test dataset
-        
-        Returns:
-            KL divergence value
+        Uses feature-wise KL divergence for better sensitivity in high-dimensional latent space.
         """
-        # Parse corruption type and severity
         parts = corruption_type.rsplit('_', 1)
         if len(parts) == 2:
             corruption_name = parts[0]
@@ -148,13 +151,11 @@ class Cifar100Dataset:
         else:
             raise ValueError(f"Invalid corruption type: {corruption_type}")
         
-        # Load corrupted data
         corruption_file = self.CIFAR100_C_PATH / f'{corruption_name}.npy'
         
         if not corruption_file.exists():
             raise FileNotFoundError(f"Corruption file not found: {corruption_file}")
         
-        # Load and extract specific severity
         images = np.load(corruption_file)
         start_idx = (severity - 1) * 10000
         end_idx = severity * 10000
@@ -165,7 +166,7 @@ class Cifar100Dataset:
         latent_clean = encoder.predict(test_ds)
         latent_corrupted = encoder.predict(corrupted_ds)
 
-        return calculate_kl_divergence(latent_clean, latent_corrupted)
+        return calculate_kl_divergence(latent_clean, latent_corrupted, method='feature_wise')
 
 
 

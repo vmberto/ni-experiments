@@ -22,8 +22,8 @@ DATASET = Cifar100Dataset(INPUT_SHAPE, BATCH_SIZE)
 RandAugment = keras_cv.layers.RandAugment(value_range=(0, 1), augmentations_per_image=3, magnitude=0.3, rate=1)
 MODEL_ARCHITECTURES = [
     # ResNet20Model,
-    # WideResNet28_10Model,
-    CCTModel,
+    WideResNet28_10Model,
+    # CCTModel,
 ]
 
 CONFIGS = [
@@ -37,7 +37,7 @@ CONFIGS = [
         "strategy_name": 'RandAugment',
         "data_augmentation_layers": [RandAugment],
         "curriculum_learning": False,
-        "active": False,
+        "active": True,
     },
     {
         "strategy_name": 'RandAugment+S&P',
@@ -55,10 +55,10 @@ CONFIGS = [
             CustomGaussianNoise(max_stddev=GAUSSIAN_STDDEV),
         ],
         "curriculum_learning": False,
-        "active": False,
+        "active": True,
     },
     {
-        "strategy_name": 'Curriculum Learning',
+        "strategy_name": 'Scheduling Policy',
         "data_augmentation_layers": [
             [RandAugment],
             [
@@ -72,27 +72,10 @@ CONFIGS = [
         ],
         "es_patience_stages": [3, 5, 8],
         "curriculum_learning": True,
-        "active": False,
-    },
-    {
-        "strategy_name": 'Gaussian',
-        "data_augmentation_layers": [
-            CustomGaussianNoise(max_stddev=GAUSSIAN_STDDEV),
-        ],
-        "curriculum_learning": False,
-        "active": False,
-    },
-    {
-        "strategy_name": 'Salt&Pepper',
-        "data_augmentation_layers": [
-            RandomSaltAndPepper(max_factor=SALT_PEPPER_FACTOR),
-        ],
-        "curriculum_learning": False,
-        "active": False,
+        "active": True,
     },
 ]
 
 
 if __name__ == '__main__':
     experiment(DATASET, EPOCHS, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CIFAR100_CORRUPTIONS, num_classes=100, input_shape=INPUT_SHAPE)
-
