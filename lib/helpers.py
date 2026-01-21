@@ -38,7 +38,10 @@ def prepare_df(df, categories_df_path):
     )
     merged_results.drop(columns=['corruption_type'], inplace=True)
     merged_results.drop(columns=['category'], inplace=True)
-
+    merged_results["corruption_group"] = (
+        merged_results["evaluation_set"]
+        .str.replace(r"_\d+$", "", regex=True)
+    )
     return merged_results
 
 

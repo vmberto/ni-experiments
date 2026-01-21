@@ -4,16 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from lib.helpers import seaborn_styles, bootstrap_confidence_interval
 
-dataset = 'cifar10'
-# dataset = 'agnews'
+dataset = 'cifar100'
 
 MODEL_ORDER = [
     'ResNet20',
-    # 'CNNText',
-    'WideResNet28-10',
-    # 'BiLSTM',
-    'CCT',
-    # 'TinyTransformer'
+    # 'WideResNet28-10',
+    # 'CCT',
 ]
 
 seaborn_styles(sns)
@@ -32,7 +28,7 @@ STRATEGIES_ORDER = {
 results = pd.concat([
     pd.read_csv(f'../results/{dataset}/overall_results.csv'),
 ], ignore_index=False)
-characterization_df = pd.read_csv(f'../results/{dataset}/{dataset}_c_divergences_categories.csv')
+characterization_df = pd.read_csv(f'../results/{dataset}/{dataset}_{dataset}c_characterization_category.csv')
 
 results['evaluation_set'] = results['evaluation_set'].str.replace(' ', '_').str.lower()
 results['evaluation_set'] = results['evaluation_set'].str.replace('-', '_').str.lower()
