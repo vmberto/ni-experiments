@@ -21,9 +21,9 @@ DATASET = Cifar100Dataset(INPUT_SHAPE, BATCH_SIZE)
 
 RandAugment = keras_cv.layers.RandAugment(value_range=(0, 1), augmentations_per_image=3, magnitude=0.3, rate=1)
 MODEL_ARCHITECTURES = [
-    # ResNet20Model,
+    ResNet20Model,
     WideResNet28_10Model,
-    # CCTModel,
+    CCTModel,
 ]
 
 CONFIGS = [

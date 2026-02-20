@@ -6,7 +6,7 @@ from matplotlib.lines import Line2D
 
 from lib.helpers import seaborn_styles, prepare_df, bootstrap_confidence_interval, markers
 
-dataset = 'cifar100'
+dataset = 'cifar10'
 
 # Paths
 RAW_RESULTS_PATH = f'../results/{dataset}/overall_results.csv'
@@ -18,7 +18,7 @@ X_LIM_MAX = 1.0
 
 # Constants
 estimator = 'f1-score(weighted avg)'
-noise_like = {"gaussian_noise", "shot_noise", "speckle_noise", "impulse_noise", "contrast", "brightness"}
+noise_like = {"gaussian_noise", "impulse_noise", "gaussian_blur", "zoom_blur", "contrast", "brightness", "saturate" }
 
 seaborn_styles(sns)
 

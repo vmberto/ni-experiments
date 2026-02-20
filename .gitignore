@@ -8,6 +8,8 @@ mimii_dataset
 # C extensions
 *.so
 
+*.tar
+
 */CIFAR-100-C/*
 
 # Distribution / packaging
