@@ -8,6 +8,7 @@ from layers.custom_gaussian_noise import CustomGaussianNoise
 from models.wideresnet2810 import WideResNet28_10Model
 from models.cct import CCTModel
 from models.resnet20 import ResNet20Model
+import os
 
 
 KFOLD_N_SPLITS = 10
@@ -17,6 +18,7 @@ GAUSSIAN_STDDEV = .2
 INPUT_SHAPE = (32, 32, 3)
 BATCH_SIZE = 128
 EPOCHS = 200
+START_FOLD = int(os.getenv("START_FOLD", "1"))
 DATASET = Cifar10Dataset(INPUT_SHAPE, BATCH_SIZE)
 
 RandAugment = keras_cv.layers.RandAugment(value_range=(0, 1), augmentations_per_image=3, magnitude=0.3, rate=1)
@@ -94,4 +96,14 @@ CONFIGS = [
 
 
 if __name__ == '__main__':
-    experiment(DATASET, EPOCHS, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CIFAR10_CORRUPTIONS, num_classes=10, input_shape=INPUT_SHAPE)
+    experiment(
+        DATASET,
+        EPOCHS,
+        KFOLD_N_SPLITS,
+        CONFIGS,
+        MODEL_ARCHITECTURES,
+        CIFAR10_CORRUPTIONS,
+        num_classes=10,
+        input_shape=INPUT_SHAPE,
+        start_fold=START_FOLD
+    )

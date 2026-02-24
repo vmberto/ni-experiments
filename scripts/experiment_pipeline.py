@@ -10,9 +10,6 @@ from lib.logger import print_execution, print_evaluation
 from lib.helpers import filter_active
 
 # Enable mixed precision training for memory efficiency
-tf.keras.mixed_precision.set_global_policy('mixed_float16')
-
-# Configure GPU memory growth to avoid OOM errors
 gpus = tf.config.list_physical_devices('GPU')
 if gpus:
     try:
@@ -161,16 +158,32 @@ def _evaluate_and_log(model, params):
         )
 
 
-def experiment(dataset, epochs, kfold_n_splits, configs, model_architectures, corruptions, num_classes=10, input_shape=(32, 32, 3)):
+def experiment(
+    dataset,
+    epochs,
+    kfold_n_splits,
+    configs,
+    model_architectures,
+    corruptions,
+    num_classes=10,
+    input_shape=(32, 32, 3),
+    start_fold=1,
+):
     experiments_config = filter_active(configs)
     date_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     experiment_dir = os.path.join(os.getcwd(), f'output/experiment_complete')
 
     x_train, y_train, x_test, y_test, splits = dataset.get_kfold_splits(kfold_n_splits)
 
-    combinations = itertools.product(enumerate(experiments_config), splits)
+    if start_fold < 1 or start_fold > kfold_n_splits:
+        raise ValueError(f"start_fold must be between 1 and {kfold_n_splits}. Got: {start_fold}")
+
+    filtered_splits = [
+        (fold, indices) for fold, indices in splits if (fold + 1) >= start_fold
+    ]
 
     for model in model_architectures:
+        combinations = itertools.product(enumerate(experiments_config), filtered_splits)
         for (config_index, config), (fold, (train_index, val_index)) in combinations:
             params = {
                 "config": config,

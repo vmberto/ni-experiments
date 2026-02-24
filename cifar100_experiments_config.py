@@ -8,6 +8,7 @@ from layers.custom_gaussian_noise import CustomGaussianNoise
 from models.wideresnet2810 import WideResNet28_10Model
 from models.cct import CCTModel
 from models.resnet20 import ResNet20Model
+import os
 
 
 KFOLD_N_SPLITS = 10
@@ -17,13 +18,14 @@ GAUSSIAN_STDDEV = .2
 INPUT_SHAPE = (32, 32, 3)
 BATCH_SIZE = 128
 EPOCHS = 200
+START_FOLD = int(os.getenv("START_FOLD", "1"))
 DATASET = Cifar100Dataset(INPUT_SHAPE, BATCH_SIZE)
 
 RandAugment = keras_cv.layers.RandAugment(value_range=(0, 1), augmentations_per_image=3, magnitude=0.3, rate=1)
 MODEL_ARCHITECTURES = [
-    ResNet20Model,
+    # ResNet20Model,
     WideResNet28_10Model,
-    CCTModel,
+    # CCTModel,
 ]
 
 CONFIGS = [
@@ -31,7 +33,7 @@ CONFIGS = [
         "strategy_name": 'Baseline',
         "data_augmentation_layers": [],
         "curriculum_learning": False,
-        "active": True,
+        "active": False,
     },
     {
         "strategy_name": 'RandAugment',
@@ -55,7 +57,7 @@ CONFIGS = [
             CustomGaussianNoise(max_stddev=GAUSSIAN_STDDEV),
         ],
         "curriculum_learning": False,
-        "active": True,
+        "active": False,
     },
     {
         "strategy_name": 'Scheduling Policy',
@@ -72,10 +74,20 @@ CONFIGS = [
         ],
         "es_patience_stages": [3, 5, 8],
         "curriculum_learning": True,
-        "active": True,
+        "active": False,
     },
 ]
 
 
 if __name__ == '__main__':
-    experiment(DATASET, EPOCHS, KFOLD_N_SPLITS, CONFIGS, MODEL_ARCHITECTURES, CIFAR100_CORRUPTIONS, num_classes=100, input_shape=INPUT_SHAPE)
+    experiment(
+        DATASET,
+        EPOCHS,
+        KFOLD_N_SPLITS,
+        CONFIGS,
+        MODEL_ARCHITECTURES,
+        CIFAR100_CORRUPTIONS,
+        num_classes=100,
+        input_shape=INPUT_SHAPE,
+        start_fold=START_FOLD
+    )

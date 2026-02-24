@@ -6,7 +6,7 @@ from matplotlib.lines import Line2D
 
 from lib.helpers import seaborn_styles, prepare_df, bootstrap_confidence_interval, markers
 
-dataset = 'cifar10'
+dataset = 'cifar100'
 
 # Paths
 RAW_RESULTS_PATH = f'../results/{dataset}/overall_results.csv'
