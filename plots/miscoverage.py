@@ -9,7 +9,7 @@ dataset = 'cifar100'
 MODEL_ORDER = [
     'ResNet20',
     # 'WideResNet28-10',
-    # 'CCT',
+    'CCT',
 ]
 
 seaborn_styles(sns)
@@ -26,9 +26,9 @@ STRATEGIES_ORDER = {
 }
 
 results = pd.concat([
-    pd.read_csv(f'../results/{dataset}/overall_results.csv'),
+    pd.read_csv(f'../results/{dataset}/output.csv'),
 ], ignore_index=False)
-characterization_df = pd.read_csv(f'../results/{dataset}/{dataset}_{dataset}c_characterization_category.csv')
+characterization_df = pd.read_csv(f'../results/{dataset}/{dataset}_final_characterization_with_stats.csv')
 
 results['evaluation_set'] = results['evaluation_set'].str.replace(' ', '_').str.lower()
 results['evaluation_set'] = results['evaluation_set'].str.replace('-', '_').str.lower()

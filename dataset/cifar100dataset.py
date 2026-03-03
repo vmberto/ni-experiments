@@ -1,13 +1,11 @@
 import tensorflow as tf
 from tensorflow.data import Dataset
 import keras_cv as keras_cv
-import tensorflow_datasets as tfds
 from keras import datasets, models
 from sklearn.model_selection import KFold
 import numpy as np
 from dataset.ood_characterization import calculate_kl_divergence
 from pathlib import Path
-import os
 
 
 class Cifar100Dataset:
@@ -21,12 +19,36 @@ class Cifar100Dataset:
     def __init__(self, input_shape, batch_size):
         self.input_shape = input_shape
         self.batch_size = batch_size
+        self._labels_cache = None
+        self._corruption_memmaps = {}
 
-        # Define once
-        self.resize_and_rescale = models.Sequential([
-            keras_cv.layers.Resizing(input_shape[0], input_shape[1]),
-            keras_cv.layers.Rescaling(1. / 255)
-        ])
+        # CIFAR images are already 32x32; skip resizing when target size matches.
+        preprocessing_layers = []
+        if (input_shape[0], input_shape[1]) != (32, 32):
+            preprocessing_layers.append(keras_cv.layers.Resizing(input_shape[0], input_shape[1]))
+        preprocessing_layers.append(keras_cv.layers.Rescaling(1. / 255))
+        self.resize_and_rescale = models.Sequential(preprocessing_layers)
+
+    def _load_labels_once(self):
+        """Load CIFAR-100-C labels once and keep in memory."""
+        if self._labels_cache is None:
+            labels_file = self.CIFAR100_C_PATH / 'labels.npy'
+            if not labels_file.exists():
+                raise FileNotFoundError(f"Labels file not found: {labels_file}")
+            self._labels_cache = np.load(labels_file)
+        return self._labels_cache
+
+    def _load_corruption_memmap(self, corruption_name):
+        """Load corruption file as memmap once to avoid repeated full-array reads."""
+        if corruption_name not in self._corruption_memmaps:
+            corruption_file = self.CIFAR100_C_PATH / f'{corruption_name}.npy'
+            if not corruption_file.exists():
+                raise FileNotFoundError(
+                    f"Corruption file not found: {corruption_file}\n"
+                    f"Available corruptions should be in .npy format in {self.CIFAR100_C_PATH}"
+                )
+            self._corruption_memmaps[corruption_name] = np.load(corruption_file, mmap_mode='r')
+        return self._corruption_memmaps[corruption_name]
 
     def prepare(self, ds, shuffle=False, augmentation_layer=None):
         ds = ds.map(
@@ -88,24 +110,11 @@ class Cifar100Dataset:
                 f"Extract CIFAR-100-C.tar to: {self.CIFAR100_C_PATH.parent}\n"
             )
         
-        # Load corruption .npy file
-        corruption_file = self.CIFAR100_C_PATH / f'{corruption_name}.npy'
-        labels_file = self.CIFAR100_C_PATH / 'labels.npy'
-        
-        if not corruption_file.exists():
-            raise FileNotFoundError(
-                f"Corruption file not found: {corruption_file}\n"
-                f"Available corruptions should be in .npy format in {self.CIFAR100_C_PATH}"
-            )
-        
-        if not labels_file.exists():
-            raise FileNotFoundError(f"Labels file not found: {labels_file}")
-        
-        # Load data
+        # Load data (memmap for corruptions + one-time labels cache)
         # CIFAR-100-C structure: 50,000 images (10,000 per severity level)
         # Severity levels 1-5 are stored sequentially
-        images = np.load(corruption_file)
-        labels = np.load(labels_file)
+        images = self._load_corruption_memmap(corruption_name)
+        labels = self._load_labels_once()
         
         # Extract images for the specific severity level
         # Each severity has 10,000 images
@@ -151,15 +160,10 @@ class Cifar100Dataset:
         else:
             raise ValueError(f"Invalid corruption type: {corruption_type}")
         
-        corruption_file = self.CIFAR100_C_PATH / f'{corruption_name}.npy'
-        
-        if not corruption_file.exists():
-            raise FileNotFoundError(f"Corruption file not found: {corruption_file}")
-        
-        images = np.load(corruption_file)
+        images = self._load_corruption_memmap(corruption_name)
         start_idx = (severity - 1) * 10000
         end_idx = severity * 10000
-        x_corrupted = images[start_idx:end_idx].astype('float32') / 255.0
+        x_corrupted = np.asarray(images[start_idx:end_idx], dtype='float32') / 255.0
         
         corrupted_ds = self.get_dataset_for_autoencoder(x_corrupted)
 
